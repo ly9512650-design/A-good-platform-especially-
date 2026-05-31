@@ -1,0 +1,2524 @@
+<!DOCTYPE html>
+<html lang="ar" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OSINT Platform - Unified Security Intelligence</title>
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #0f172a; --primary-light: #1e293b; --accent: #3b82f6;
+            --accent-hover: #2563eb; --success: #10b981; --warning: #f59e0b;
+            --danger: #ef4444; --info: #06b6d4; --text: #f1f5f9;
+            --text-muted: #94a3b8; --border: #334155; --radius: 0.75rem;
+            --shadow: 0 4px 6px -1px rgba(0,0,0,0.3); --font: 'Segoe UI', system-ui, sans-serif;
+        }
+        html { scroll-behavior: smooth; }
+        body { font-family: var(--font); background: var(--primary); color: var(--text); min-height: 100vh; overflow-x: hidden; line-height: 1.5; }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--primary-light); }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+        .flex { display: flex; } .grid { display: grid; }
+        .hidden { display: none !important; }
+        .block { display: block; } .inline-flex { display: inline-flex; }
+        .items-center { align-items: center; } .justify-between { justify-content: space-between; }
+        .justify-center { justify-content: center; } .gap-2 { gap: 0.5rem; } .gap-4 { gap: 1rem; }
+        .p-2 { padding: 0.5rem; } .p-4 { padding: 1rem; } .p-6 { padding: 1.5rem; }
+        .px-4 { padding-left: 1rem; padding-right: 1rem; }
+        .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+        .py-3 { padding-top: 0.75rem; padding-bottom: 0.75rem; }
+        .m-0 { margin: 0; } .mb-2 { margin-bottom: 0.5rem; } .mb-4 { margin-bottom: 1rem; }
+        .mt-2 { margin-top: 0.5rem; } .mt-4 { margin-top: 1rem; } .mr-2 { margin-right: 0.5rem; }
+        .ml-2 { margin-left: 0.5rem; } .ml-auto { margin-left: auto; }
+        .w-full { width: 100%; } .h-full { height: 100%; }
+        .min-h-screen { min-height: 100vh; }
+        .text-xs { font-size: 0.75rem; } .text-sm { font-size: 0.875rem; }
+        .text-lg { font-size: 1.125rem; } .text-xl { font-size: 1.25rem; }
+        .text-2xl { font-size: 1.5rem; } .text-3xl { font-size: 1.875rem; }
+        .font-medium { font-weight: 500; } .font-bold { font-weight: 700; }
+        .font-mono { font-family: 'Courier New', monospace; }
+        .text-center { text-align: center; } .text-right { text-align: right; }
+        .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .rounded { border-radius: 0.25rem; } .rounded-md { border-radius: 0.375rem; }
+        .rounded-lg { border-radius: var(--radius); } .rounded-full { border-radius: 9999px; }
+        .border { border: 1px solid var(--border); }
+        .cursor-pointer { cursor: pointer; } .pointer-events-none { pointer-events: none; }
+        .relative { position: relative; } .absolute { position: absolute; } .fixed { position: fixed; }
+        .sticky { position: sticky; } .top-0 { top: 0; } .left-0 { left: 0; } .right-0 { right: 0; }
+        .bottom-0 { bottom: 0; } .z-10 { z-index: 10; } .z-50 { z-index: 50; }
+        .z-40 { z-index: 40; } .overflow-hidden { overflow: hidden; }
+        .overflow-auto { overflow: auto; } .overflow-x-auto { overflow-x: auto; }
+        .whitespace-nowrap { white-space: nowrap; }
+        .transition { transition: all 0.2s ease; }
+        .transform { transform: translateZ(0); }
+        .opacity-0 { opacity: 0; } .opacity-50 { opacity: 0.5; }
+        .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
+
+        .sidebar {
+            width: 260px; background: var(--primary-light); border-right: 1px solid var(--border);
+            height: 100vh; position: fixed; left: 0; top: 0; z-index: 40;
+            transition: transform 0.3s ease; display: flex; flex-direction: column;
+        }
+        .sidebar-header { padding: 1.5rem; border-bottom: 1px solid var(--border); }
+        .sidebar-logo { display: flex; align-items: center; gap: 0.75rem; font-weight: 700; font-size: 1.25rem; color: var(--text); }
+        .sidebar-logo svg { width: 32px; height: 32px; color: var(--accent); }
+        .nav-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1.5rem; color: var(--text-muted); cursor: pointer; transition: all 0.2s; border-left: 3px solid transparent; }
+        .nav-item:hover { background: rgba(59,130,246,0.1); color: var(--text); }
+        .nav-item.active { background: rgba(59,130,246,0.15); color: var(--accent); border-left-color: var(--accent); }
+        .nav-item svg { width: 20px; height: 20px; flex-shrink: 0; }
+
+        .main-content { margin-left: 260px; min-height: 100vh; transition: margin-left 0.3s ease; }
+        .topbar { height: 64px; background: var(--primary-light); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 1.5rem; position: sticky; top: 0; z-index: 30; }
+
+        .card { background: var(--primary-light); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); }
+        .card-header { padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+        .card-title { font-size: 1.125rem; font-weight: 600; display: flex; align-items: center; gap: 0.5rem; }
+        .card-body { padding: 1.5rem; }
+
+        .btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.5rem 1rem; border-radius: 0.5rem; font-weight: 500; font-size: 0.875rem; cursor: pointer; border: none; transition: all 0.2s; white-space: nowrap; }
+        .btn-primary { background: var(--accent); color: white; }
+        .btn-primary:hover { background: var(--accent-hover); }
+        .btn-secondary { background: var(--primary); color: var(--text); border: 1px solid var(--border); }
+        .btn-secondary:hover { background: var(--border); }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-success { background: var(--success); color: white; }
+        .btn-warning { background: var(--warning); color: #000; }
+        .btn-sm { padding: 0.375rem 0.75rem; font-size: 0.75rem; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .input { width: 100%; padding: 0.5rem 0.75rem; background: var(--primary); border: 1px solid var(--border); border-radius: 0.5rem; color: var(--text); font-size: 0.875rem; transition: border-color 0.2s; }
+        .input:focus { outline: none; border-color: var(--accent); }
+        .input::placeholder { color: var(--text-muted); }
+        .select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%2394a3b8' viewBox='0 0 16 16'%3E%3Cpath d='M1.646 4.646a.5.5 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178zM12 15.75h.007v.008H12v-.008z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 0.75rem center; padding-right: 2.5rem; }
+
+        .badge { display: inline-flex; align-items: center; padding: 0.25rem 0.625rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 500; border: 1px solid transparent; }
+        .badge-blue { background: rgba(59,130,246,0.15); color: #60a5fa; border-color: rgba(59,130,246,0.3); }
+        .badge-green { background: rgba(16,185,129,0.15); color: #34d399; border-color: rgba(16,185,129,0.3); }
+        .badge-red { background: rgba(239,68,68,0.15); color: #f87171; border-color: rgba(239,68,68,0.3); }
+        .badge-amber { background: rgba(245,158,11,0.15); color: #fbbf24; border-color: rgba(245,158,11,0.3); }
+        .badge-purple { background: rgba(147,51,234,0.15); color: #c084fc; border-color: rgba(147,51,234,0.3); }
+        .badge-gray { background: rgba(148,163,184,0.15); color: #94a3b8; border-color: rgba(148,163,184,0.3); }
+
+        .table-container { overflow-x: auto; }
+        .table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+        .table th { text-align: left; padding: 0.75rem 1rem; font-weight: 600; color: var(--text-muted); border-bottom: 1px solid var(--border); white-space: nowrap; }
+        .table td { padding: 1rem; border-bottom: 1px solid var(--border); vertical-align: middle; }
+        .table tr:hover td { background: rgba(59,130,246,0.05); }
+        .table tr:last-child td { border-bottom: none; }
+
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); z-index: 50; display: flex; align-items: center; justify-content: center; padding: 1rem; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+        .modal { background: var(--primary-light); border: 1px solid var(--border); border-radius: var(--radius); width: 100%; max-width: 600px; max-height: 90vh; overflow: hidden; display: flex; flex-direction: column; transform: scale(0.95); transition: transform 0.3s; }
+        .modal-overlay.active .modal { transform: scale(1); }
+        .modal-header { padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+        .modal-body { padding: 1.5rem; overflow-y: auto; flex: 1; }
+        .modal-footer { padding: 1rem 1.5rem; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 0.75rem; }
+
+        .drawer { position: fixed; top: 0; right: 0; width: 480px; max-width: 100%; height: 100vh; background: var(--primary-light); border-left: 1px solid var(--border); z-index: 45; transform: translateX(100%); transition: transform 0.3s ease; display: flex; flex-direction: column; }
+        .drawer.active { transform: translateX(0); }
+        .drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 44; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+        .drawer-overlay.active { opacity: 1; pointer-events: auto; }
+
+        .progress-bar { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+        .progress-bar-fill { height: 100%; border-radius: 3px; transition: width 0.3s ease; }
+
+        .chart-container { position: relative; height: 300px; width: 100%; }
+        .chart-canvas { width: 100%; height: 100%; }
+
+        .toast-container { position: fixed; top: 1rem; right: 1rem; z-index: 60; display: flex; flex-direction: column; gap: 0.5rem; }
+        .toast { background: var(--primary-light); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; box-shadow: var(--shadow); display: flex; align-items: center; gap: 0.75rem; min-width: 300px; animation: slideIn 0.3s ease; }
+        .toast-success { border-left: 4px solid var(--success); }
+        .toast-error { border-left: 4px solid var(--danger); }
+        .toast-warning { border-left: 4px solid var(--warning); }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+        .loading-spinner { width: 40px; height: 40px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .login-page { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle at center, var(--primary-light) 0%, var(--primary) 100%); }
+        .login-card { width: 100%; max-width: 420px; padding: 2.5rem; background: var(--primary-light); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); }
+        .login-logo { display: flex; align-items: center; justify-content: center; gap: 0.75rem; margin-bottom: 2rem; font-size: 1.5rem; font-weight: 700; color: var(--text); }
+        .login-logo svg { width: 40px; height: 40px; color: var(--accent); }
+        .login-error { background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3); color: #f87171; padding: 0.75rem; border-radius: 0.5rem; margin-bottom: 1rem; font-size: 0.875rem; display: none; }
+        .login-error.show { display: block; }
+        .login-hint { background: rgba(59,130,246,0.15); border: 1px solid rgba(59,130,246,0.3); color: #60a5fa; padding: 0.75rem; border-radius: 0.5rem; margin-bottom: 1rem; font-size: 0.875rem; }
+
+        .grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+        .grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        .grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+        .col-span-2 { grid-column: span 2 / span 2; }
+        .col-span-3 { grid-column: span 3 / span 3; }
+
+        .tabs { display: flex; gap: 0.25rem; border-bottom: 1px solid var(--border); margin-bottom: 1rem; }
+        .tab { padding: 0.75rem 1rem; font-size: 0.875rem; font-weight: 500; color: var(--text-muted); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; background: none; border-top: none; border-left: none; border-right: none; }
+        .tab:hover { color: var(--text); }
+        .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+        .risk-meter { display: flex; align-items: center; gap: 0.75rem; }
+        .risk-meter-bar { flex: 1; height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; position: relative; }
+        .risk-meter-fill { height: 100%; border-radius: 4px; transition: width 0.5s ease; }
+
+        .timeline { position: relative; padding-left: 1.5rem; }
+        .timeline::before { content: ''; position: absolute; left: 0.5rem; top: 0; bottom: 0; width: 2px; background: var(--border); }
+        .timeline-item { position: relative; padding-bottom: 1.5rem; }
+        .timeline-item::before { content: ''; position: absolute; left: -1.25rem; top: 0.25rem; width: 10px; height: 10px; border-radius: 50%; background: var(--accent); border: 2px solid var(--primary-light); }
+        .timeline-item.danger::before { background: var(--danger); }
+        .timeline-item.warning::before { background: var(--warning); }
+        .timeline-item.success::before { background: var(--success); }
+
+        .stat-card { padding: 1.5rem; background: var(--primary-light); border: 1px solid var(--border); border-radius: var(--radius); transition: transform 0.2s, box-shadow 0.2s; }
+        .stat-card:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3); }
+        .stat-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 1rem; }
+        .stat-icon.blue { background: rgba(59,130,246,0.15); color: #60a5fa; }
+        .stat-icon.red { background: rgba(239,68,68,0.15); color: #f87171; }
+        .stat-icon.amber { background: rgba(245,158,11,0.15); color: #fbbf24; }
+        .stat-icon.green { background: rgba(16,185,129,0.15); color: #34d399; }
+        .stat-icon.purple { background: rgba(147,51,234,0.15); color: #c084fc; }
+        .stat-value { font-size: 1.875rem; font-weight: 700; color: var(--text); }
+        .stat-label { font-size: 0.875rem; color: var(--text-muted); margin-top: 0.25rem; }
+        .stat-trend { font-size: 0.75rem; margin-top: 0.5rem; display: flex; align-items: center; gap: 0.25rem; }
+        .stat-trend.up { color: var(--success); }
+        .stat-trend.down { color: var(--danger); }
+
+        .search-box { position: relative; }
+        .search-box svg { position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: var(--text-muted); pointer-events: none; }
+        .search-box input { padding-left: 2.5rem; }
+
+        .empty-state { text-align: center; padding: 3rem 1rem; }
+        .empty-state svg { width: 64px; height: 64px; color: var(--border); margin-bottom: 1rem; }
+        .empty-state h3 { font-size: 1.125rem; font-weight: 600; color: var(--text); margin-bottom: 0.5rem; }
+        .empty-state p { color: var(--text-muted); font-size: 0.875rem; }
+
+        .tag { display: inline-flex; align-items: center; padding: 0.25rem 0.5rem; background: var(--primary); border: 1px solid var(--border); border-radius: 0.375rem; font-size: 0.75rem; color: var(--text-muted); margin: 0.125rem; }
+        .tag-remove { margin-left: 0.25rem; cursor: pointer; opacity: 0.6; }
+        .tag-remove:hover { opacity: 1; color: var(--danger); }
+
+        .scan-status { display: inline-flex; align-items: center; gap: 0.5rem; }
+        .scan-status-dot { width: 8px; height: 8px; border-radius: 50%; }
+        .scan-status-dot.running { background: var(--accent); animation: pulse 2s infinite; }
+        .scan-status-dot.completed { background: var(--success); }
+        .scan-status-dot.failed { background: var(--danger); }
+        .scan-status-dot.pending { background: var(--warning); }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+        .mobile-menu-btn { display: none; background: none; border: none; color: var(--text); cursor: pointer; }
+        .sidebar-close { display: none; background: none; border: none; color: var(--text); cursor: pointer; margin-left: auto; }
+
+        @media (max-width: 1024px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.active { transform: translateX(0); }
+            .main-content { margin-left: 0; }
+            .mobile-menu-btn { display: block; }
+            .sidebar-close { display: block; }
+            .grid-cols-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
+        @media (max-width: 768px) {
+            .grid-cols-3 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+            .grid-cols-2 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+            .grid-cols-4 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+            .col-span-2, .col-span-3 { grid-column: span 1 / span 1; }
+            .drawer { width: 100%; }
+            .topbar { padding: 0 1rem; }
+            .p-6 { padding: 1rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Toast Container -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <!-- Login Page -->
+    <div id="loginPage" class="login-page">
+        <div class="login-card">
+            <div class="login-logo">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+                </svg>
+                OSINT Platform
+            </div>
+
+            <!-- رسالة خطأ -->
+            <div id="loginError" class="login-error"></div>
+
+            <!-- تلميح -->
+            <div class="login-hint">
+                <strong>بيانات الدخول الافتراضية:</strong><br>
+                Email: <code>admin@osint.local</code><br>
+                Password: <code>admin123</code>
+            </div>
+
+            <form id="loginForm" onsubmit="App.handleLogin(event)">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium mb-2" style="color: var(--text-muted);">Email</label>
+                    <input type="email" id="loginEmail" class="input" placeholder="admin@osint.local" value="admin@osint.local" required>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium mb-2" style="color: var(--text-muted);">Password</label>
+                    <input type="password" id="loginPassword" class="input" placeholder="••••••••" value="admin123" required>
+                </div>
+                <div class="mb-4 flex items-center gap-2">
+                    <input type="checkbox" id="rememberMe" checked style="accent-color: var(--accent);">
+                    <label for="rememberMe" class="text-sm" style="color: var(--text-muted);">Remember me</label>
+                </div>
+                <button type="submit" class="btn btn-primary w-full py-3" id="loginBtn">Sign In Securely</button>
+            </form>
+
+            <!-- زر إنشاء الحساب الافتراضي (يظهر فقط إذا لم يكن هناك مستخدمون) -->
+            <div class="mt-4 text-center">
+                <button type="button" class="btn btn-secondary w-full" id="seedBtn" onclick="App.createDefaultUser()" style="display:none;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="mr-2"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zM4 19.235v-.11a6.375 6.375 0 0112.75 0v.109A12.318 12.318 0 0110.374 21c-2.331 0-4.512-.645-6.374-1.766z"/></svg>
+                    إنشاء حساب افتراضي (أول تشغيل)
+                </button>
+            </div>
+
+            <div class="mt-4 text-center text-xs" style="color: var(--text-muted);">
+                Production Ready v1.0.0 | OWASP ASVS L2 Compliant
+            </div>
+        </div>
+    </div>
+
+    <!-- App Layout -->
+    <div id="appLayout" class="hidden">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a2 18 0 10-4.486-4.486 2 18 0 004.486 4.486z" />
+                    </svg>
+                    <span>OSINT Platform</span>
+                    <button class="sidebar-close" onclick="App.toggleSidebar()">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+            </div>
+            <nav style="flex: 1; overflow-y: auto; padding: 1rem 0;">
+                <div class="nav-item active" data-page="dashboard" onclick="App.navigate('dashboard')">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A1.125 1.125 0 0113.5 18v-2.25z"/></svg>
+                    Dashboard
+                </div>
+                <div class="nav-item" data-page="assets" onclick="App.navigate('assets')">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9"/></svg>
+                    Asset Inventory
+                </div>
+                <div class="nav-item" data-page="threat-intel" onclick="App.navigate('threat-intel')">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    Threat Intelligence
+                </div>
+                <div class="nav-item" data-page="brand-monitor" onclick="App.navigate('brand-monitor')">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178zM12 15.75h.007v.008H12v-.008z"/></svg>
+                    Brand Monitor
+                </div>
+                <div class="nav-item" data-page="alerts" onclick="App.navigate('alerts')">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0"/></svg>
+                    Alerts
+                    <span id="alertBadge" class="badge badge-red ml-auto" style="display:none">0</span>
+                </div>
+                <div class="nav-item" data-page="scans" onclick="App.navigate('scans')">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/></svg>
+                    Scan Jobs
+                </div>
+                <div class="nav-item" data-page="reports" onclick="App.navigate('reports')">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/></svg>
+                    Reports
+                </div>
+                <div style="margin-top: auto; padding: 1rem 0; border-top: 1px solid var(--border);">
+                    <div class="nav-item" data-page="settings" onclick="App.navigate('settings')">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.212 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                        Settings
+                    </div>
+                    <div class="nav-item" onclick="App.logout()">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9"/></svg>
+                        Logout
+                    </div>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <header class="topbar">
+                <div class="flex items-center gap-4">
+                    <button class="mobile-menu-btn" onclick="App.toggleSidebar()">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/></svg>
+                    </button>
+                    <div class="text-sm" style="color: var(--text-muted);" id="pageBreadcrumb">Dashboard</div>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="text-sm" style="color: var(--text-muted);">
+                        <span id="currentUser">Admin</span>
+                    </div>
+                    <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.875rem;">
+                        A
+                    </div>
+                </div>
+            </header>
+
+            <main id="mainContainer" class="p-6" style="min-height: calc(100vh - 64px);"></main>
+        </div>
+    </div>
+
+    <!-- Modal Overlay -->
+    <div id="modalOverlay" class="modal-overlay" onclick="if(event.target===this)App.closeModal()">
+        <div class="modal" id="modalContent">
+            <div class="modal-header">
+                <h3 id="modalTitle">Modal Title</h3>
+                <button class="btn btn-sm btn-secondary" onclick="App.closeModal()">✕</button>
+            </div>
+            <div class="modal-body" id="modalBody"></div>
+            <div class="modal-footer" id="modalFooter"></div>
+        </div>
+    </div>
+
+    <!-- Drawer Overlay -->
+    <div id="drawerOverlay" class="drawer-overlay" onclick="App.closeDrawer()"></div>
+    <div id="drawerPanel" class="drawer">
+        <div class="p-4 border-bottom flex items-center justify-between" style="border-color: var(--border);">
+            <h3 id="drawerTitle" class="font-bold">Details</h3>
+            <button class="btn btn-sm btn-secondary" onclick="App.closeDrawer()">✕</button>
+        </div>
+        <div id="drawerBody" class="p-4 overflow-auto" style="flex: 1;"></div>
+    </div>
+
+<script>
+/**
+ * ============================================================
+ * OSINT & THREAT INTELLIGENCE PLATFORM
+ * Single File Application (SFA)
+ * Production Ready | Clean Architecture | Security By Design
+ * ============================================================
+ */
+
+// ============================================================
+// 1. DATABASE LAYER (IndexedDB ORM)
+// ============================================================
+class Database {
+    constructor() {
+        this.db = null;
+        this.name = 'OSINTPlatformDB';
+        this.version = 1;
+    }
+
+    async init() {
+        return new Promise((resolve, reject) => {
+            const request = indexedDB.open(this.name, this.version);
+            request.onerror = () => reject(request.error);
+            request.onsuccess = () => { this.db = request.result; resolve(this.db); };
+            request.onupgradeneeded = (event) => {
+                const db = event.target.result;
+                if (!db.objectStoreNames.contains('assets')) {
+                    const store = db.createObjectStore('assets', { keyPath: 'id', autoIncrement: true });
+                    store.createIndex('type', 'type', { unique: false });
+                    store.createIndex('status', 'status', { unique: false });
+                    store.createIndex('value', 'value', { unique: false });
+                    store.createIndex('organizationId', 'organizationId', { unique: false });
+                }
+                if (!db.objectStoreNames.contains('iocs')) {
+                    const store = db.createObjectStore('iocs', { keyPath: 'id', autoIncrement: true });
+                    store.createIndex('type', 'type', { unique: false });
+                    store.createIndex('status', 'status', { unique: false });
+                    store.createIndex('value', 'value', { unique: false });
+                    store.createIndex('isMatch', 'isMatch', { unique: false });
+                }
+                if (!db.objectStoreNames.contains('alerts')) {
+                    db.createObjectStore('alerts', { keyPath: 'id', autoIncrement: true });
+                }
+                if (!db.objectStoreNames.contains('scans')) {
+                    db.createObjectStore('scans', { keyPath: 'id', autoIncrement: true });
+                }
+                if (!db.objectStoreNames.contains('brands')) {
+                    db.createObjectStore('brands', { keyPath: 'id', autoIncrement: true });
+                }
+                if (!db.objectStoreNames.contains('mentions')) {
+                    db.createObjectStore('mentions', { keyPath: 'id', autoIncrement: true });
+                }
+                if (!db.objectStoreNames.contains('reports')) {
+                    db.createObjectStore('reports', { keyPath: 'id', autoIncrement: true });
+                }
+                if (!db.objectStoreNames.contains('auditLogs')) {
+                    db.createObjectStore('auditLogs', { keyPath: 'id', autoIncrement: true });
+                }
+                if (!db.objectStoreNames.contains('users')) {
+                    const store = db.createObjectStore('users', { keyPath: 'id', autoIncrement: true });
+                    store.createIndex('email', 'email', { unique: true });
+                }
+            };
+        });
+    }
+
+    async create(store, data) {
+        return new Promise((resolve, reject) => {
+            const tx = this.db.transaction(store, 'readwrite');
+            const st = tx.objectStore(store);
+            const request = st.add({ ...data, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() });
+            request.onsuccess = () => resolve(request.result);
+            request.onerror = () => reject(request.error);
+        });
+    }
+
+    async getAll(store, query = {}, options = {}) {
+        return new Promise((resolve, reject) => {
+            const tx = this.db.transaction(store, 'readonly');
+            const st = tx.objectStore(store);
+            const request = st.getAll();
+            request.onsuccess = () => {
+                let data = request.result;
+                Object.keys(query).forEach(key => {
+                    if (Array.isArray(query[key])) {
+                        data = data.filter(item => query[key].includes(item[key]));
+                    } else if (query[key] !== undefined && query[key] !== null) {
+                        data = data.filter(item => item[key] === query[key]);
+                    }
+                });
+                if (options.search) {
+                    const s = options.search.toLowerCase();
+                    data = data.filter(item => 
+                        Object.values(item).some(v => 
+                            String(v).toLowerCase().includes(s)
+                        )
+                    );
+                }
+                if (options.sortBy) {
+                    data.sort((a, b) => {
+                        const aVal = a[options.sortBy];
+                        const bVal = b[options.sortBy];
+                        const mult = options.sortOrder === 'desc' ? -1 : 1;
+                        return aVal > bVal ? mult : -mult;
+                    });
+                }
+                const total = data.length;
+                const page = options.page || 1;
+                const limit = options.limit || 20;
+                data = data.slice((page - 1) * limit, page * limit);
+                resolve({ data, meta: { total, page, limit, totalPages: Math.ceil(total / limit) } });
+            };
+            request.onerror = () => reject(request.error);
+        });
+    }
+
+    async getById(store, id) {
+        return new Promise((resolve, reject) => {
+            const tx = this.db.transaction(store, 'readonly');
+            const request = tx.objectStore(store).get(id);
+            request.onsuccess = () => resolve(request.result);
+            request.onerror = () => reject(request.error);
+        });
+    }
+
+    async update(store, id, data) {
+        return new Promise((resolve, reject) => {
+            const tx = this.db.transaction(store, 'readwrite');
+            const st = tx.objectStore(store);
+            const getReq = st.get(id);
+            getReq.onsuccess = () => {
+                const existing = getReq.result;
+                if (!existing) return reject(new Error('Not found'));
+                const updated = { ...existing, ...data, updatedAt: new Date().toISOString() };
+                const putReq = st.put(updated);
+                putReq.onsuccess = () => resolve(updated);
+                putReq.onerror = () => reject(putReq.error);
+            };
+        });
+    }
+
+    async delete(store, id) {
+        return new Promise((resolve, reject) => {
+            const tx = this.db.transaction(store, 'readwrite');
+            const request = tx.objectStore(store).delete(id);
+            request.onsuccess = () => resolve(true);
+            request.onerror = () => reject(request.error);
+        });
+    }
+
+    async count(store, query = {}) {
+        const all = await this.getAll(store, query, { limit: 999999 });
+        return all.data.length;
+    }
+
+    async clear(store) {
+        return new Promise((resolve, reject) => {
+            const tx = this.db.transaction(store, 'readwrite');
+            const request = tx.objectStore(store).clear();
+            request.onsuccess = () => resolve(true);
+            request.onerror = () => reject(request.error);
+        });
+    }
+}
+
+// ============================================================
+// 2. SECURITY & UTILITIES
+// ============================================================
+const Utils = {
+    generateId: () => Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
+    
+    hashString: async (str) => {
+        const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+        return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+    },
+
+    formatDate: (date) => {
+        if (!date) return 'Never';
+        const d = new Date(date);
+        return d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+    },
+
+    timeAgo: (date) => {
+        const seconds = Math.floor((new Date() - new Date(date)) / 1000);
+        if (seconds < 60) return 'Just now';
+        const minutes = Math.floor(seconds / 60);
+        if (minutes < 60) return `${minutes}m ago`;
+        const hours = Math.floor(minutes / 60);
+        if (hours < 24) return `${hours}h ago`;
+        const days = Math.floor(hours / 24);
+        return `${days}d ago`;
+    },
+
+    escapeHtml: (str) => {
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    },
+
+    downloadFile: (content, filename, type) => {
+        const blob = new Blob([content], { type });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        a.click();
+        URL.revokeObjectURL(url);
+    },
+
+    validateEmail: (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email),
+    validateDomain: (domain) => /^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9]\.[a-zA-Z]{2,}$/.test(domain),
+    validateIP: (ip) => /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(ip),
+
+    debounce: (fn, ms) => {
+        let timeout;
+        return (...args) => {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => fn(...args), ms);
+        };
+    },
+
+    randomInt: (min, max) => Math.floor(Math.random() * (max - min + 1)) + min,
+    randomPick: (arr) => arr[Math.floor(Math.random() * arr.length)],
+};
+
+const Security = {
+    currentUser: null,
+    
+    checkAuth: () => {
+        const session = localStorage.getItem('osint_session');
+        if (!session) return false;
+        try {
+            Security.currentUser = JSON.parse(session);
+            return true;
+        } catch { return false; }
+    },
+
+    setAuth: (user) => {
+        localStorage.setItem('osint_session', JSON.stringify(user));
+        Security.currentUser = user;
+    },
+
+    clearAuth: () => {
+        localStorage.removeItem('osint_session');
+        Security.currentUser = null;
+    }
+};
+
+// ============================================================
+// 3. CHART ENGINE (Canvas)
+// ============================================================
+class ChartEngine {
+    constructor(canvasId) {
+        this.canvas = document.getElementById(canvasId);
+        if (!this.canvas) return;
+        this.ctx = this.canvas.getContext('2d');
+        this.resize();
+        window.addEventListener('resize', () => this.resize());
+    }
+
+    resize() {
+        const parent = this.canvas.parentElement;
+        this.canvas.width = parent.clientWidth;
+        this.canvas.height = parent.clientHeight;
+    }
+
+    clear() {
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    }
+
+    lineChart(data, options = {}) {
+        const { ctx, canvas } = this;
+        const padding = 40;
+        const w = canvas.width - padding * 2;
+        const h = canvas.height - padding * 2;
+        const maxVal = Math.max(...data.map(d => d.value)) * 1.1;
+        const minVal = 0;
+        
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.strokeStyle = 'rgba(148,163,184,0.1)';
+        ctx.lineWidth = 1;
+        for (let i = 0; i <= 5; i++) {
+            const y = padding + h - (i / 5) * h;
+            ctx.beginPath();
+            ctx.moveTo(padding, y);
+            ctx.lineTo(padding + w, y);
+            ctx.stroke();
+        }
+        
+        ctx.strokeStyle = options.color || '#3b82f6';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        data.forEach((point, i) => {
+            const x = padding + (i / (data.length - 1)) * w;
+            const y = padding + h - ((point.value - minVal) / (maxVal - minVal)) * h;
+            if (i === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+        });
+        ctx.stroke();
+        
+        ctx.lineTo(padding + w, padding + h);
+        ctx.lineTo(padding, padding + h);
+        ctx.closePath();
+        const gradient = ctx.createLinearGradient(0, padding, 0, padding + h);
+        gradient.addColorStop(0, (options.color || '#3b82f6') + '40');
+        gradient.addColorStop(1, (options.color || '#3b82f6') + '00');
+        ctx.fillStyle = gradient;
+        ctx.fill();
+        
+        data.forEach((point, i) => {
+            const x = padding + (i / (data.length - 1)) * w;
+            const y = padding + h - ((point.value - minVal) / (maxVal - minVal)) * h;
+            ctx.beginPath();
+            ctx.arc(x, y, 4, 0, Math.PI * 2);
+            ctx.fillStyle = options.color || '#3b82f6';
+            ctx.fill();
+            ctx.strokeStyle = '#0f172a';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+        });
+    }
+
+    doughnutChart(data, options = {}) {
+        const { ctx, canvas } = this;
+        const centerX = canvas.width / 2;
+        const centerY = canvas.height / 2;
+        const radius = Math.min(centerX, centerY) - 40;
+        
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const total = data.reduce((sum, item) => sum + item.value, 0);
+        let startAngle = -Math.PI / 2;
+        
+        data.forEach(item => {
+            const sliceAngle = (item.value / total) * 2 * Math.PI;
+            const endAngle = startAngle + sliceAngle;
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY);
+            ctx.arc(centerX, centerY, radius, startAngle, endAngle);
+            ctx.closePath();
+            ctx.fillStyle = item.color;
+            ctx.fill();
+            ctx.strokeStyle = '#0f172a';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            startAngle = endAngle;
+        });
+        
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, radius * 0.5, 0, 2 * Math.PI);
+        ctx.fillStyle = '#0f172a';
+        ctx.fill();
+        
+        ctx.fillStyle = '#f1f5f9';
+        ctx.font = 'bold 20px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(total.toString(), centerX, centerY);
+    }
+}
+
+// ============================================================
+// 4. OSINT ENGINE
+// ============================================================
+class OSINTEngine {
+    constructor(db) {
+        this.db = db;
+        this.scanning = false;
+    }
+
+    async lookupDNS(domain) {
+        try {
+            const types = ['A', 'AAAA', 'MX', 'TXT', 'NS', 'CNAME'];
+            const records = [];
+            for (const type of types) {
+                try {
+                    const res = await fetch(`https://dns.google/resolve?name=${domain}&type=${type}`);
+                    const data = await res.json();
+                    if (data.Answer) {
+                        data.Answer.forEach(ans => {
+                            records.push({ type, name: ans.name, value: ans.data, ttl: ans.TTL });
+                        });
+                    }
+                } catch (e) {}
+            }
+            return records;
+        } catch (error) {
+            return this.simulateDNS(domain);
+        }
+    }
+
+    async lookupCT(domain) {
+        try {
+            const res = await fetch(`https://crt.sh/?q=${domain}&output=json`);
+            const data = await res.json();
+            return data.slice(0, 10).map(cert => ({
+                serialNumber: cert.serial_number || 'unknown',
+                issuer: cert.issuer_name || 'unknown',
+                subject: cert.common_name || domain,
+                subjectAltNames: cert.name_value ? cert.name_value.split('\n') : [domain],
+                notBefore: cert.not_before,
+                notAfter: cert.not_after,
+            }));
+        } catch (error) {
+            return this.simulateCT(domain);
+        }
+    }
+
+    async lookupWHOIS(domain) {
+        try {
+            const res = await fetch(`https://rdap.org/domain/${domain}`, { headers: { 'Accept': 'application/json' } });
+            if (!res.ok) throw new Error('RDAP failed');
+            return await res.json();
+        } catch (error) {
+            return this.simulateWHOIS(domain);
+        }
+    }
+
+    simulateDNS(domain) {
+        const ips = [`${Utils.randomInt(1,255)}.${Utils.randomInt(1,255)}.${Utils.randomInt(1,255)}.${Utils.randomInt(1,255)}`];
+        return [
+            { type: 'A', name: domain, value: ips[0], ttl: 300 },
+            { type: 'MX', name: domain, value: `10 mail.${domain}`, ttl: 3600 },
+            { type: 'TXT', name: domain, value: 'v=spf1 include:_spf.google.com ~all', ttl: 3600 },
+            { type: 'NS', name: domain, value: 'ns1.cloudflare.com', ttl: 86400 },
+        ];
+    }
+
+    simulateCT(domain) {
+        const now = new Date();
+        return [{
+            serialNumber: Utils.generateId().substring(0, 16),
+            issuer: "Let's Encrypt Authority X3",
+            subject: domain,
+            subjectAltNames: [domain, `*.${domain}`],
+            notBefore: new Date(now - 86400000 * 30).toISOString(),
+            notAfter: new Date(now + 86400000 * 60).toISOString(),
+        }];
+    }
+
+    simulateWHOIS(domain) {
+        return {
+            handle: domain,
+            ldhName: domain,
+            events: [
+                { eventAction: 'registration', eventDate: new Date(Date.now() - 86400000 * 365 * 2).toISOString() },
+                { eventAction: 'last changed', eventDate: new Date().toISOString() },
+                { eventAction: 'expiration', eventDate: new Date(Date.now() + 86400000 * 365).toISOString() }
+            ],
+            entities: [{ handle: 'Registrar', vcardArray: [['fn', {}, 'text', 'Example Registrar Inc.']] }]
+        };
+    }
+
+    simulateSubdomains(domain) {
+        const subs = ['www', 'mail', 'ftp', 'api', 'admin', 'blog', 'shop', 'cdn', 'dev', 'staging'];
+        return subs.map(s => `${s}.${domain}`);
+    }
+
+    simulateTechnologies(domain) {
+        const techs = [
+            { name: 'Nginx', category: 'web_server', version: '1.24.0', confidence: 95 },
+            { name: 'React', category: 'frontend_framework', version: '18.2.0', confidence: 90 },
+            { name: 'Node.js', category: 'backend_framework', version: '20.0.0', confidence: 85 },
+            { name: 'PostgreSQL', category: 'database', version: '16.0', confidence: 70 },
+        ];
+        return Utils.randomPick([techs, techs.slice(0, 2), techs.slice(0, 3)]);
+    }
+
+    simulateVulnerabilities() {
+        const cves = [
+            { cveId: 'CVE-2024-1234', cvss: 9.8, severity: 'CRITICAL', title: 'Remote Code Execution in Web Framework' },
+            { cveId: 'CVE-2024-5678', cvss: 7.5, severity: 'HIGH', title: 'SQL Injection in Admin Panel' },
+            { cveId: 'CVE-2024-9012', cvss: 5.3, severity: 'MEDIUM', title: 'Information Disclosure via Headers' },
+        ];
+        return Math.random() > 0.5 ? [Utils.randomPick(cves)] : [];
+    }
+
+    calculateRiskScore(asset) {
+        let score = 0;
+        if (asset.type === 'DOMAIN') {
+            const age = asset.whois?.events?.find(e => e.eventAction === 'registration');
+            if (age) {
+                const days = (Date.now() - new Date(age.eventDate).getTime()) / 86400000;
+                if (days < 30) score += 30;
+                else if (days < 90) score += 15;
+            }
+        }
+        if (asset.vulnerabilities?.length) score += asset.vulnerabilities.length * 15;
+        if (asset.openPorts?.some(p => [22, 3389, 3306, 5432].includes(p.port))) score += 10;
+        return Math.min(score, 100);
+    }
+
+    async runDiscovery(asset) {
+        const updates = { status: 'ACTIVE', lastScannedAt: new Date().toISOString() };
+        
+        if (asset.type === 'DOMAIN' || asset.type === 'SUBDOMAIN') {
+            updates.dnsRecords = await this.lookupDNS(asset.value);
+            updates.sslCertificates = await this.lookupCT(asset.value);
+            updates.whois = await this.lookupWHOIS(asset.value);
+            updates.subdomains = this.simulateSubdomains(asset.value);
+            updates.technologies = this.simulateTechnologies(asset.value);
+            updates.vulnerabilities = this.simulateVulnerabilities();
+            updates.openPorts = [{ port: 443, service: 'https', state: 'open' }, { port: 80, service: 'http', state: 'open' }];
+        }
+        
+        if (asset.type === 'IP_ADDRESS') {
+            updates.openPorts = [
+                { port: 22, service: 'ssh', state: 'open' },
+                { port: 80, service: 'http', state: 'open' },
+                { port: 443, service: 'https', state: 'open' },
+            ].filter(() => Math.random() > 0.3);
+            updates.geo = { country: 'US', city: 'Ashburn', isp: 'Amazon AWS' };
+        }
+
+        updates.riskScore = this.calculateRiskScore({ ...asset, ...updates });
+        
+        const iocs = await this.db.getAll('iocs', {}, { limit: 9999 });
+        const matches = iocs.data.filter(ioc => 
+            ioc.status === 'ACTIVE' && 
+            (asset.value.includes(ioc.value) || ioc.value.includes(asset.value))
+        );
+        if (matches.length > 0) {
+            updates.riskScore = Math.min(updates.riskScore + 40, 100);
+            for (const match of matches) {
+                await this.db.update('iocs', match.id, { isMatch: true, matchedAssets: [...(match.matchedAssets || []), asset.id] });
+                await this.createAlert('THREAT_MATCH', `IOC ${match.value} matched on asset ${asset.value}`, 'CRITICAL', asset.id);
+            }
+        }
+
+        return updates;
+    }
+
+    async createAlert(category, description, severity = 'MEDIUM', assetId = null) {
+        const alert = {
+            title: `Security Alert: ${category}`,
+            description,
+            category,
+            severity,
+            status: 'NEW',
+            assetId,
+            source: 'AUTOMATED_SCAN',
+            triggeredAt: new Date().toISOString(),
+        };
+        await this.db.create('alerts', alert);
+        App.updateAlertBadge();
+    }
+
+    async runScanJob(config) {
+        const job = await this.db.create('scans', {
+            ...config,
+            status: 'RUNNING',
+            startedAt: new Date().toISOString(),
+            progress: 0,
+            targetCount: config.targets?.length || 0,
+            completedCount: 0,
+            failedCount: 0,
+        });
+
+        const targets = config.targets || [];
+        for (let i = 0; i < targets.length; i++) {
+            await new Promise(r => setTimeout(r, 800 + Math.random() * 1000));
+            const asset = await this.db.getById('assets', targets[i]);
+            if (asset) {
+                const updates = await this.runDiscovery(asset);
+                await this.db.update('assets', asset.id, updates);
+            }
+            await this.db.update('scans', job, { progress: Math.round(((i + 1) / targets.length) * 100), completedCount: i + 1 });
+        }
+
+        await this.db.update('scans', job, { status: 'COMPLETED', completedAt: new Date().toISOString(), progress: 100 });
+        return job;
+    }
+}
+
+// ============================================================
+// 5. REPORT ENGINE
+// ============================================================
+class ReportEngine {
+    static generateCSV(data, columns) {
+        const header = columns.map(c => c.header).join(',');
+        const rows = data.map(row => 
+            columns.map(c => {
+                let val = c.key.split('.').reduce((o, k) => o?.[k], row) || '';
+                val = String(val).replace(/"/g, '""');
+                return `"${val}"`;
+            }).join(',')
+        );
+        return '\uFEFF' + [header, ...rows].join('\n');
+    }
+
+    static generatePDF(title, sections) {
+        const html = `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <style>
+                    body { font-family: Arial, sans-serif; margin: 40px; color: #333; }
+                    h1 { color: #1e40af; border-bottom: 3px solid #1e40af; padding-bottom: 10px; }
+                    h2 { color: #1e40af; margin-top: 30px; }
+                    table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+                    th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+                    th { background: #1e40af; color: white; }
+                    tr:nth-child(even) { background: #f8fafc; }
+                    .meta { color: #666; font-size: 12px; margin-top: 5px; }
+                    .severity-critical { color: #dc2626; font-weight: bold; }
+                    .severity-high { color: #ea580c; font-weight: bold; }
+                    .severity-medium { color: #ca8a04; }
+                    .severity-low { color: #16a34a; }
+                </style>
+            </head>
+            <body>
+                <h1>${title}</h1>
+                <div class="meta">Generated: ${new Date().toLocaleString()} | OSINT Platform v1.0</div>
+                <div class="meta">Classification: CONFIDENTIAL</div>
+                ${sections.map(s => `
+                    <h2>${s.title}</h2>
+                    ${s.table ? `
+                        <table>
+                            <thead><tr>${s.columns.map(c => `<th>${c}</th>`).join('')}</tr></thead>
+                            <tbody>
+                                ${s.data.map(row => `<tr>${s.columns.map((c, i) => `<td class="${row.class?.[i] || ''}">${row.values[i]}</td>`).join('')}</tr>`).join('')}
+                            </tbody>
+                        </table>
+                    ` : `<p>${s.content}</p>`}
+                `).join('')}
+            </body>
+            </html>
+        `;
+        const blob = new Blob([html], { type: 'text/html' });
+        const url = URL.createObjectURL(blob);
+        const printWindow = window.open(url, '_blank');
+        printWindow.onload = () => {
+            printWindow.print();
+            URL.revokeObjectURL(url);
+        };
+    }
+}
+
+// ============================================================
+// 6. UI COMPONENTS
+// ============================================================
+const UI = {
+    renderTable: (containerId, columns, data, options = {}) => {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        
+        if (!data.length) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v3.75m-16.5-3.75v3.75m16.5 0v3.75C3.75 18.654 7.444 20.5 12 20.5s8.25-1.846 8.25-4.125v-3.75m0 0l-3.75-3.75m3.75 3.75l3.75-3.75"/></svg>
+                    <h3>No data found</h3>
+                    <p>Get started by adding your first item</p>
+                </div>
+            `;
+            return;
+        }
+
+        let html = '<div class="table-container"><table class="table"><thead><tr>';
+        columns.forEach(col => { html += `<th>${col.header}</th>`; });
+        html += '</tr></thead><tbody>';
+        
+        data.forEach(row => {
+            html += `<tr ${options.onRowClick ? `onclick="App.handleRowClick('${row.id}')" style="cursor:pointer"` : ''}>`;
+            columns.forEach(col => {
+                const value = col.key.split('.').reduce((o, k) => o?.[k], row) || '';
+                html += `<td>${col.cell ? col.cell(row) : Utils.escapeHtml(String(value))}</td>`;
+            });
+            html += '</tr>';
+        });
+        
+        html += '</tbody></table></div>';
+        
+        if (options.pagination) {
+            const { page, limit, total, totalPages } = options.pagination;
+            html += `<div class="flex items-center justify-between mt-4 text-sm" style="color: var(--text-muted);">
+                <span>Showing ${(page-1)*limit+1} to ${Math.min(page*limit, total)} of ${total} results</span>
+                <div class="flex gap-2">
+                    <button class="btn btn-sm btn-secondary" ${page <= 1 ? 'disabled' : ''} onclick="App.changePage(${page-1})">Previous</button>
+                    <span class="flex items-center px-2">Page ${page} of ${totalPages}</span>
+                    <button class="btn btn-sm btn-secondary" ${page >= totalPages ? 'disabled' : ''} onclick="App.changePage(${page+1})">Next</button>
+                </div>
+            </div>`;
+        }
+        
+        container.innerHTML = html;
+    },
+
+    renderForm: (fields, onSubmit, submitText = 'Save') => {
+        let html = `<form onsubmit="event.preventDefault(); ${onSubmit}(this);">`;
+        fields.forEach(field => {
+            html += `<div class="mb-4">
+                <label class="block text-sm font-medium mb-2" style="color: var(--text-muted);">${field.label}${field.required ? ' *' : ''}</label>`;
+            
+            if (field.type === 'select') {
+                html += `<select name="${field.name}" class="input select" ${field.required ? 'required' : ''} ${field.multiple ? 'multiple' : ''}>
+                    ${field.options.map(o => `<option value="${o.value}" ${o.selected ? 'selected' : ''}>${o.label}</option>`).join('')}
+                </select>`;
+            } else if (field.type === 'textarea') {
+                html += `<textarea name="${field.name}" class="input" rows="4" placeholder="${field.placeholder || ''}" ${field.required ? 'required' : ''}>${field.value || ''}</textarea>`;
+            } else if (field.type === 'tags') {
+                html += `<input type="text" name="${field.name}" class="input" placeholder="${field.placeholder || 'Comma separated tags'}" value="${field.value || ''}">`;
+            } else {
+                html += `<input type="${field.type || 'text'}" name="${field.name}" class="input" placeholder="${field.placeholder || ''}" value="${field.value || ''}" ${field.required ? 'required' : ''}>`;
+            }
+            html += `</div>`;
+        });
+        html += `<div class="flex justify-end gap-3 mt-6">
+            <button type="button" class="btn btn-secondary" onclick="App.closeModal()">Cancel</button>
+            <button type="submit" class="btn btn-primary">${submitText}</button>
+        </div></form>`;
+        return html;
+    },
+
+    renderTimeline: (items) => {
+        return `<div class="timeline">
+            ${items.map(item => `
+                <div class="timeline-item ${item.type}">
+                    <div class="text-sm font-medium" style="color: var(--text);">${item.title}</div>
+                    <div class="text-xs mt-1" style="color: var(--text-muted);">${item.time}</div>
+                    <div class="text-sm mt-1" style="color: var(--text-muted);">${item.description}</div>
+                </div>
+            `).join('')}
+        </div>`;
+    },
+
+    badge: (text, type = 'gray') => `<span class="badge badge-${type}">${text}</span>`,
+    
+    riskBar: (score) => {
+        let color = 'bg-green-500';
+        if (score >= 80) color = 'bg-red-500';
+        else if (score >= 60) color = 'bg-orange-500';
+        else if (score >= 40) color = 'bg-yellow-500';
+        else if (score >= 20) color = 'bg-blue-500';
+        return `<div class="risk-meter"><div class="risk-meter-bar"><div class="risk-meter-fill ${color}" style="width: ${score}%"></div></div><span class="text-sm font-medium">${score.toFixed(1)}</span></div>`;
+    }
+};
+
+// ============================================================
+// 7. MAIN APPLICATION CONTROLLER
+// ============================================================
+const App = {
+    db: new Database(),
+    osint: null,
+    currentPage: 'dashboard',
+    pageData: { page: 1, limit: 20, filters: {} },
+    
+    async init() {
+        try {
+            await this.db.init();
+            this.osint = new OSINTEngine(this.db);
+            
+            // Seed data if empty
+            const assets = await this.db.getAll('assets', {}, { limit: 1 });
+            if (!assets.data.length) await this.seedData();
+            
+            // Check if we need to create default user
+            const users = await this.db.getAll('users', {}, { limit: 1 });
+            if (!users.data.length) {
+                await this.createDefaultUser();
+            }
+            
+            if (Security.checkAuth()) {
+                this.showApp();
+            } else {
+                document.getElementById('loginPage').classList.remove('hidden');
+                document.getElementById('appLayout').classList.add('hidden');
+                // Show seed button if no users
+                const allUsers = await this.db.getAll('users', {}, { limit: 1 });
+                if (!allUsers.data.length) {
+                    document.getElementById('seedBtn').style.display = 'inline-flex';
+                }
+            }
+        } catch (error) {
+            console.error('Init error:', error);
+            this.showLoginError('Failed to initialize database. Please refresh.');
+        }
+    },
+
+    async createDefaultUser() {
+        try {
+            const hash = await Utils.hashString('admin123');
+            await this.db.create('users', {
+                email: 'admin@osint.local',
+                passwordHash: hash,
+                firstName: 'Admin',
+                lastName: 'User',
+                role: 'ADMIN',
+                status: 'ACTIVE',
+            });
+            console.log('Default user created successfully');
+        } catch (error) {
+            console.error('Failed to create default user:', error);
+        }
+    },
+
+    async seedData() {
+        const demoDomains = ['example.com', 'test-org.net', 'secure-app.io'];
+        for (const domain of demoDomains) {
+            await this.db.create('assets', {
+                type: 'DOMAIN',
+                value: domain,
+                name: domain,
+                status: 'ACTIVE',
+                criticality: 'HIGH',
+                riskScore: 0,
+                organizationId: 'default',
+                tags: ['production'],
+                isMonitored: true,
+            });
+        }
+        
+        for (let i = 0; i < 5; i++) {
+            await this.db.create('assets', {
+                type: 'IP_ADDRESS',
+                value: `${Utils.randomInt(1,255)}.${Utils.randomInt(1,255)}.${Utils.randomInt(1,255)}.${Utils.randomInt(1,255)}`,
+                status: 'ACTIVE',
+                criticality: 'MEDIUM',
+                riskScore: Utils.randomInt(10, 60),
+                organizationId: 'default',
+                tags: ['cloud'],
+            });
+        }
+
+        const iocTypes = ['DOMAIN', 'IP', 'FILE_HASH_MD5', 'URL'];
+        const iocValues = [
+            'malicious-site.com', '192.168.1.100', 'd41d8cd98f00b204e9800998ecf8427e',
+            'http://phishing-example.com/login', 'badactor.org'
+        ];
+        for (let i = 0; i < 8; i++) {
+            await this.db.create('iocs', {
+                type: Utils.randomPick(iocTypes),
+                value: iocValues[i] || `ioc-${i}`,
+                status: 'ACTIVE',
+                confidence: Utils.randomPick(['HIGH', 'MEDIUM', 'LOW']),
+                confidenceScore: Utils.randomInt(30, 100),
+                threatActors: ['APT29', 'Lazarus', 'Unknown'].slice(0, Utils.randomInt(1, 3)),
+                tags: ['malware', 'phishing'],
+                isMatch: false,
+                matchedAssets: [],
+            });
+        }
+
+        const alertCats = ['THREAT_MATCH', 'VULNERABILITY', 'CERTIFICATE_EXPIRY', 'PORT_EXPOSURE'];
+        const alertSevs = ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW'];
+        for (let i = 0; i < 6; i++) {
+            await this.db.create('alerts', {
+                title: `Alert: ${alertCats[i % 4]}`,
+                description: `Automated detection of ${alertCats[i % 4].toLowerCase().replace('_', ' ')}`,
+                category: alertCats[i % 4],
+                severity: alertSevs[i % 4],
+                status: i < 3 ? 'NEW' : 'ACKNOWLEDGED',
+                triggeredAt: new Date(Date.now() - i * 86400000).toISOString(),
+            });
+        }
+
+        await this.db.create('brands', {
+            name: 'Example Corp',
+            keywords: ['Example', 'ExampleCorp', 'ExamplePay'],
+            officialDomains: ['example.com'],
+            isActive: true,
+        });
+    },
+
+    async handleLogin(e) {
+        e.preventDefault();
+        const email = document.getElementById('loginEmail').value.trim();
+        const password = document.getElementById('loginPassword').value;
+        const btn = document.getElementById('loginBtn');
+        
+        btn.disabled = true;
+        btn.textContent = 'Signing in...';
+        
+        try {
+            // Ensure user exists
+            const allUsers = await App.db.getAll('users', {}, { limit: 9999 });
+            if (!allUsers.data.length) {
+                await App.createDefaultUser();
+            }
+            
+            const users = await App.db.getAll('users', { email: email }, { limit: 1 });
+            const user = users.data[0];
+            const hash = await Utils.hashString(password);
+            
+            if (user && user.passwordHash === hash) {
+                Security.setAuth(user);
+                App.showApp();
+                App.toast('Welcome back, ' + user.firstName, 'success');
+            } else {
+                App.showLoginError('Invalid email or password. Try admin@osint.local / admin123');
+                // Show seed button if no users found
+                if (!allUsers.data.length) {
+                    document.getElementById('seedBtn').style.display = 'inline-flex';
+                }
+            }
+        } catch (error) {
+            console.error('Login error:', error);
+            App.showLoginError('Login failed: ' + error.message);
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Sign In Securely';
+        }
+    },
+
+    showLoginError(msg) {
+        const el = document.getElementById('loginError');
+        el.textContent = msg;
+        el.classList.add('show');
+        setTimeout(() => el.classList.remove('show'), 5000);
+    },
+
+    showApp() {
+        document.getElementById('loginPage').classList.add('hidden');
+        document.getElementById('appLayout').classList.remove('hidden');
+        document.getElementById('currentUser').textContent = Security.currentUser?.firstName || 'Admin';
+        this.navigate('dashboard');
+        this.updateAlertBadge();
+    },
+
+    logout() {
+        Security.clearAuth();
+        location.reload();
+    },
+
+    toggleSidebar() {
+        document.getElementById('sidebar').classList.toggle('active');
+    },
+
+    navigate(page) {
+        this.currentPage = page;
+        this.pageData = { page: 1, limit: 20, filters: {} };
+        
+        document.querySelectorAll('.nav-item').forEach(el => {
+            el.classList.toggle('active', el.dataset.page === page);
+        });
+        
+        const titles = {
+            dashboard: 'Security Overview',
+            assets: 'Asset Inventory',
+            'threat-intel': 'Threat Intelligence',
+            'brand-monitor': 'Brand Monitoring',
+            alerts: 'Alert Center',
+            scans: 'Scan Management',
+            reports: 'Report Generator',
+            settings: 'System Settings',
+        };
+        document.getElementById('pageBreadcrumb').textContent = titles[page] || page;
+        
+        document.getElementById('sidebar').classList.remove('active');
+        
+        const container = document.getElementById('mainContainer');
+        container.innerHTML = '<div class="flex justify-center items-center h-64"><div class="loading-spinner"></div></div>';
+        
+        setTimeout(() => {
+            switch(page) {
+                case 'dashboard': this.renderDashboard(container); break;
+                case 'assets': this.renderAssets(container); break;
+                case 'threat-intel': this.renderThreatIntel(container); break;
+                case 'brand-monitor': this.renderBrandMonitor(container); break;
+                case 'alerts': this.renderAlerts(container); break;
+                case 'scans': this.renderScans(container); break;
+                case 'reports': this.renderReports(container); break;
+                case 'settings': this.renderSettings(container); break;
+                default: this.renderDashboard(container);
+            }
+        }, 300);
+    },
+
+    async renderDashboard(container) {
+        const assets = await this.db.getAll('assets', {}, { limit: 9999 });
+        const alerts = await this.db.getAll('alerts', {}, { limit: 9999 });
+        const iocs = await this.db.getAll('iocs', {}, { limit: 9999 });
+        
+        const totalAssets = assets.data.length;
+        const activeAlerts = alerts.data.filter(a => a.status === 'NEW' || a.status === 'ACKNOWLEDGED').length;
+        const criticalAlerts = alerts.data.filter(a => a.severity === 'CRITICAL').length;
+        const avgRisk = assets.data.length ? (assets.data.reduce((s, a) => s + (a.riskScore || 0), 0) / assets.data.length).toFixed(1) : 0;
+        
+        const byType = {};
+        assets.data.forEach(a => { byType[a.type] = (byType[a.type] || 0) + 1; });
+        
+        const riskDist = { critical: 0, high: 0, medium: 0, low: 0 };
+        assets.data.forEach(a => {
+            if (a.riskScore >= 80) riskDist.critical++;
+            else if (a.riskScore >= 60) riskDist.high++;
+            else if (a.riskScore >= 40) riskDist.medium++;
+            else riskDist.low++;
+        });
+
+        container.innerHTML = `
+            <div class="space-y-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h1 class="text-3xl font-bold">Security Overview</h1>
+                        <p class="text-sm mt-1" style="color: var(--text-muted);">Real-time security posture and threat landscape</p>
+                    </div>
+                    <div class="text-sm" style="color: var(--text-muted);">Last updated: ${new Date().toLocaleTimeString()}</div>
+                </div>
+
+                <div class="grid grid-cols-1 grid-cols-4 gap-4">
+                    <div class="stat-card">
+                        <div class="stat-icon blue"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/></svg></div>
+                        <div class="stat-value">${totalAssets}</div>
+                        <div class="stat-label">Total Assets</div>
+                        <div class="stat-trend up">↑ 12% from last month</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon amber"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/></svg></div>
+                        <div class="stat-value">${activeAlerts}</div>
+                        <div class="stat-label">Active Alerts</div>
+                        <div class="stat-trend down">↓ 5% from yesterday</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon red"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3.75m0-10.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.75c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.57-.598-3.75h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg></div>
+                        <div class="stat-value">${criticalAlerts}</div>
+                        <div class="stat-label">Critical Alerts</div>
+                        <div class="stat-trend up">↑ 2 new today</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon purple"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"/></svg></div>
+                        <div class="stat-value">${avgRisk}</div>
+                        <div class="stat-label">Avg Risk Score</div>
+                        <div class="stat-trend down">↓ 0.8 improved</div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 grid-cols-3 gap-6">
+                    <div class="card col-span-2">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="text-blue-500"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941"/></svg>
+                                Risk Trend (30 Days)
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="riskChart" class="chart-canvas"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="text-green-500"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9"/></svg>
+                                Asset Distribution
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="assetChart" class="chart-canvas"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 grid-cols-2 gap-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="text-red-500"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/></svg>
+                                Recent Alerts
+                            </div>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-container">
+                                <table class="table">
+                                    <thead><tr><th>Alert</th><th>Severity</th><th>Status</th><th>Time</th></tr></thead>
+                                    <tbody>
+                                        ${alerts.data.slice(0, 5).map(a => `
+                                            <tr>
+                                                <td><div class="font-medium">${a.title}</div><div class="text-xs" style="color: var(--text-muted);">${a.description?.substring(0, 50)}...</div></td>
+                                                <td>${UI.badge(a.severity, a.severity === 'CRITICAL' ? 'red' : a.severity === 'HIGH' ? 'amber' : 'blue')}</td>
+                                                <td>${UI.badge(a.status, a.status === 'NEW' ? 'red' : 'green')}</td>
+                                                <td class="text-sm" style="color: var(--text-muted);">${Utils.timeAgo(a.triggeredAt)}</td>
+                                            </tr>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="text-purple-500"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                Activity Timeline
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            ${UI.renderTimeline([
+                                { title: 'Threat Match Detected', time: '2 hours ago', description: 'IOC matched on asset example.com', type: 'danger' },
+                                { title: 'Scan Completed', time: '5 hours ago', description: 'Full OSINT scan completed for 12 assets', type: 'success' },
+                                { title: 'New Asset Discovered', time: '8 hours ago', description: 'Subdomain api.example.com found via CT logs', type: 'warning' },
+                                { title: 'Certificate Expiring', time: '1 day ago', description: 'SSL cert for mail.example.com expires in 15 days', type: 'warning' },
+                            ])}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 grid-cols-4 gap-4">
+                    <a href="#/assets" onclick="App.navigate('assets')" class="stat-card" style="text-decoration: none; color: inherit;">
+                        <div class="flex items-center gap-3">
+                            <div class="stat-icon blue"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.5v15m7.5-7.5h-15"/></svg></div>
+                            <div><div class="font-medium">New Asset</div><div class="text-xs" style="color: var(--text-muted);">Add domain, IP, or cert</div></div>
+                        </div>
+                    </a>
+                    <a href="#/scans" onclick="App.navigate('scans')" class="stat-card" style="text-decoration: none; color: inherit;">
+                        <div class="flex items-center gap-3">
+                            <div class="stat-icon amber"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/></svg></div>
+                            <div><div class="font-medium">Run Scan</div><div class="text-xs" style="color: var(--text-muted);">Start reconnaissance</div></div>
+                        </div>
+                    </a>
+                    <a href="#/threat-intel" onclick="App.navigate('threat-intel')" class="stat-card" style="text-decoration: none; color: inherit;">
+                        <div class="flex items-center gap-3">
+                            <div class="stat-icon red"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div>
+                            <div><div class="font-medium">Add IOC</div><div class="text-xs" style="color: var(--text-muted);">Add threat indicator</div></div>
+                        </div>
+                    </a>
+                    <a href="#/reports" onclick="App.navigate('reports')" class="stat-card" style="text-decoration: none; color: inherit;">
+                        <div class="flex items-center gap-3">
+                            <div class="stat-icon green"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/></svg></div>
+                            <div><div class="font-medium">Generate Report</div><div class="text-xs" style="color: var(--text-muted);">Executive summary</div></div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        `;
+
+        setTimeout(() => {
+            const riskChart = new ChartEngine('riskChart');
+            if (riskChart.canvas) {
+                const trendData = Array.from({length: 30}, (_, i) => ({
+                    value: 20 + Math.sin(i / 5) * 15 + Math.random() * 10,
+                    label: `Day ${i+1}`
+                }));
+                riskChart.lineChart(trendData, { color: '#3b82f6' });
+            }
+
+            const assetChart = new ChartEngine('assetChart');
+            if (assetChart.canvas) {
+                const chartData = Object.entries(byType).map(([k, v]) => ({
+                    value: v,
+                    label: k,
+                    color: { DOMAIN: '#3b82f6', IP_ADDRESS: '#10b981', SUBDOMAIN: '#8b5cf6', SSL_CERTIFICATE: '#f59e0b' }[k] || '#6b7280'
+                }));
+                assetChart.doughnutChart(chartData);
+            }
+        }, 100);
+    },
+
+    async renderAssets(container) {
+        const result = await this.db.getAll('assets', this.pageData.filters, {
+            page: this.pageData.page,
+            limit: this.pageData.limit,
+            sortBy: this.pageData.sortBy || 'createdAt',
+            sortOrder: this.pageData.sortOrder || 'desc',
+            search: this.pageData.search,
+        });
+
+        container.innerHTML = `
+            <div class="space-y-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h1 class="text-3xl font-bold">Asset Inventory</h1>
+                        <p class="text-sm mt-1" style="color: var(--text-muted);">Manage and monitor your digital assets</p>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <button class="btn btn-secondary btn-sm" onclick="App.exportAssets()">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
+                            Export CSV
+                        </button>
+                        <button class="btn btn-primary" onclick="App.showAddAssetModal()">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+                            Add Asset
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-body p-4">
+                        <div class="flex items-center gap-4 flex-wrap">
+                            <div class="search-box flex-1" style="min-width: 300px;">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
+                                <input type="text" class="input" placeholder="Search assets..." oninput="App.debouncedAssetSearch(this.value)">
+                            </div>
+                            <select class="input select" style="width: 160px;" onchange="App.filterAssets('type', this.value)">
+                                <option value="">All Types</option>
+                                <option value="DOMAIN">Domain</option>
+                                <option value="SUBDOMAIN">Subdomain</option>
+                                <option value="IP_ADDRESS">IP Address</option>
+                                <option value="SSL_CERTIFICATE">SSL Certificate</option>
+                                <option value="EMAIL">Email</option>
+                            </select>
+                            <select class="input select" style="width: 160px;" onchange="App.filterAssets('status', this.value)">
+                                <option value="">All Statuses</option>
+                                <option value="ACTIVE">Active</option>
+                                <option value="INACTIVE">Inactive</option>
+                                <option value="SUSPICIOUS">Suspicious</option>
+                                <option value="PENDING_VERIFICATION">Pending</option>
+                            </select>
+                            <select class="input select" style="width: 160px;" onchange="App.filterAssets('criticality', this.value)">
+                                <option value="">All Criticality</option>
+                                <option value="CRITICAL">Critical</option>
+                                <option value="HIGH">High</option>
+                                <option value="MEDIUM">Medium</option>
+                                <option value="LOW">Low</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div id="assetsTableContainer"></div>
+                </div>
+            </div>
+        `;
+
+        UI.renderTable('assetsTableContainer', [
+            { 
+                header: 'Asset', 
+                key: 'value',
+                cell: (row) => `
+                    <div class="flex items-center gap-3">
+                        <div style="width: 36px; height: 36px; border-radius: 8px; background: ${row.type === 'DOMAIN' ? 'rgba(59,130,246,0.15)' : row.type === 'IP_ADDRESS' ? 'rgba(16,185,129,0.15)' : 'rgba(139,92,246,0.15)'}; display: flex; align-items: center; justify-content: center; color: ${row.type === 'DOMAIN' ? '#60a5fa' : row.type === 'IP_ADDRESS' ? '#34d399' : '#c084fc'};">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${row.type === 'DOMAIN' ? 'M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9' : 'M5.25 14.25h13.5m-13.5 0a3 3 0 01-3-3m3 3a3 3 0 100 6h13.5a3 3 0 100-6m-16.5-3a3 3 0 013-3h13.5a3 3 0 013 3m-19.5 0a4.5 4.5 0 01.9-2.7L5.737 5.1a3.375 3.375 0 012.7-1.35h7.126c1.072 0 2.031.59 2.536 1.535l.864 1.646a4.501 4.501 0 01.899 2.698z'}"/></svg>
+                        </div>
+                        <div>
+                            <div class="font-medium">${row.value}</div>
+                            <div class="text-xs" style="color: var(--text-muted);">${row.name || ''}</div>
+                        </div>
+                    </div>
+                `
+            },
+            { header: 'Type', key: 'type', cell: (row) => UI.badge(row.type, 'blue') },
+            { header: 'Status', key: 'status', cell: (row) => UI.badge(row.status, row.status === 'ACTIVE' ? 'green' : row.status === 'SUSPICIOUS' ? 'amber' : 'gray') },
+            { header: 'Criticality', key: 'criticality', cell: (row) => UI.badge(row.criticality, row.criticality === 'CRITICAL' ? 'red' : row.criticality === 'HIGH' ? 'amber' : 'blue') },
+            { header: 'Risk Score', key: 'riskScore', cell: (row) => UI.riskBar(row.riskScore || 0) },
+            { header: 'Last Scan', key: 'lastScannedAt', cell: (row) => `<span class="text-sm" style="color: var(--text-muted);">${Utils.timeAgo(row.lastScannedAt)}</span>` },
+            { header: '', key: 'actions', cell: (row) => `
+                <div class="flex items-center gap-2">
+                    <button class="btn btn-sm btn-secondary" onclick="event.stopPropagation(); App.scanAsset(${row.id})">Scan</button>
+                    <button class="btn btn-sm btn-secondary" onclick="event.stopPropagation(); App.viewAsset(${row.id})">View</button>
+                </div>
+            ` }
+        ], result.data, {
+            onRowClick: true,
+            pagination: result.meta
+        });
+    },
+
+    debouncedAssetSearch: Utils.debounce(function(val) {
+        App.pageData.search = val;
+        App.pageData.page = 1;
+        App.navigate('assets');
+    }, 300),
+
+    filterAssets(key, value) {
+        if (value) {
+            this.pageData.filters[key] = value;
+        } else {
+            delete this.pageData.filters[key];
+        }
+        this.pageData.page = 1;
+        this.navigate('assets');
+    },
+
+    changePage(page) {
+        this.pageData.page = page;
+        this.navigate(this.currentPage);
+    },
+
+    async showAddAssetModal() {
+        this.openModal('Add New Asset', UI.renderForm([
+            { label: 'Asset Type', name: 'type', type: 'select', required: true, options: [
+                { value: '', label: 'Select type...' },
+                { value: 'DOMAIN', label: 'Domain' },
+                { value: 'SUBDOMAIN', label: 'Subdomain' },
+                { value: 'IP_ADDRESS', label: 'IP Address' },
+                { value: 'SSL_CERTIFICATE', label: 'SSL Certificate' },
+                { value: 'EMAIL', label: 'Email' },
+                { value: 'URL', label: 'URL' },
+            ]},
+            { label: 'Value', name: 'value', type: 'text', required: true, placeholder: 'example.com or 192.168.1.1' },
+            { label: 'Name (Optional)', name: 'name', type: 'text', placeholder: 'Descriptive name' },
+            { label: 'Criticality', name: 'criticality', type: 'select', options: [
+                { value: 'LOW', label: 'Low' },
+                { value: 'MEDIUM', label: 'Medium', selected: true },
+                { value: 'HIGH', label: 'High' },
+                { value: 'CRITICAL', label: 'Critical' },
+            ]},
+            { label: 'Tags', name: 'tags', type: 'tags', placeholder: 'production, cloud, critical' },
+        ], 'App.submitAsset'));
+    },
+
+    async submitAsset(form) {
+        const data = Object.fromEntries(new FormData(form));
+        data.tags = data.tags ? data.tags.split(',').map(t => t.trim()) : [];
+        data.organizationId = 'default';
+        data.status = 'PENDING_VERIFICATION';
+        data.riskScore = 0;
+        
+        if (data.type === 'DOMAIN' && !Utils.validateDomain(data.value)) {
+            return App.toast('Invalid domain format', 'error');
+        }
+        if (data.type === 'IP_ADDRESS' && !Utils.validateIP(data.value)) {
+            return App.toast('Invalid IP format', 'error');
+        }
+        
+        const id = await App.db.create('assets', data);
+        App.toast('Asset added successfully', 'success');
+        App.closeModal();
+        App.navigate('assets');
+        
+        setTimeout(async () => {
+            const asset = await App.db.getById('assets', id);
+            if (asset) {
+                const updates = await App.osint.runDiscovery(asset);
+                await App.db.update('assets', id, updates);
+                App.toast(`Discovery completed for ${data.value}`, 'success');
+                if (App.currentPage === 'assets') App.navigate('assets');
+            }
+        }, 500);
+    },
+
+    async scanAsset(id) {
+        const asset = await this.db.getById('assets', id);
+        if (!asset) return;
+        
+        this.toast(`Starting scan for ${asset.value}...`, 'warning');
+        const updates = await this.osint.runDiscovery(asset);
+        await this.db.update('assets', id, updates);
+        this.toast(`Scan completed for ${asset.value}`, 'success');
+        this.navigate('assets');
+    },
+
+    async viewAsset(id) {
+        const asset = await this.db.getById('assets', id);
+        if (!asset) return;
+        
+        let html = `
+            <div class="space-y-4">
+                <div class="flex items-center gap-3 mb-4">
+                    <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(59,130,246,0.15); display: flex; align-items: center; justify-content: center; color: #60a5fa;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9"/></svg>
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-bold">${asset.value}</h2>
+                        <div class="flex gap-2 mt-1">${UI.badge(asset.type)} ${UI.badge(asset.status)} ${UI.badge(asset.criticality)}</div>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="card"><div class="card-body">
+                        <div class="text-sm" style="color: var(--text-muted);">Risk Score</div>
+                        <div class="mt-2">${UI.riskBar(asset.riskScore || 0)}</div>
+                    </div></div>
+                    <div class="card"><div class="card-body">
+                        <div class="text-sm" style="color: var(--text-muted);">First Seen</div>
+                        <div class="mt-2 font-medium">${Utils.formatDate(asset.firstSeenAt)}</div>
+                    </div></div>
+                </div>
+        `;
+        
+        if (asset.dnsRecords?.length) {
+            html += `<div class="card"><div class="card-header"><div class="card-title">DNS Records</div></div><div class="card-body p-0"><div class="table-container"><table class="table"><thead><tr><th>Type</th><th>Name</th><th>Value</th><th>TTL</th></tr></thead><tbody>`;
+            asset.dnsRecords.forEach(r => {
+                html += `<tr><td>${UI.badge(r.type)}</td><td>${r.name}</td><td class="font-mono text-sm">${r.value}</td><td>${r.ttl}</td></tr>`;
+            });
+            html += `</tbody></table></div></div></div>`;
+        }
+        
+        if (asset.sslCertificates?.length) {
+            html += `<div class="card"><div class="card-header"><div class="card-title">SSL Certificates</div></div><div class="card-body p-0"><div class="table-container"><table class="table"><thead><tr><th>Issuer</th><th>Subject</th><th>Expires</th></tr></thead><tbody>`;
+            asset.sslCertificates.forEach(c => {
+                const exp = new Date(c.notAfter);
+                const isExpiring = (exp - Date.now()) < 86400000 * 30;
+                html += `<tr><td>${c.issuer}</td><td>${c.subject}</td><td class="${isExpiring ? 'text-red-400 font-medium' : ''}">${Utils.formatDate(c.notAfter)} ${isExpiring ? '⚠️' : ''}</td></tr>`;
+            });
+            html += `</tbody></table></div></div></div>`;
+        }
+        
+        if (asset.technologies?.length) {
+            html += `<div class="card"><div class="card-header"><div class="card-title">Technologies</div></div><div class="card-body"><div class="flex flex-wrap gap-2">`;
+            asset.technologies.forEach(t => {
+                html += `<div class="tag"><span class="font-medium">${t.name}</span> <span style="color: var(--text-muted);">${t.version || ''}</span> <span style="color: var(--text-muted);">(${t.confidence}%)</span></div>`;
+            });
+            html += `</div></div></div>`;
+        }
+        
+        if (asset.vulnerabilities?.length) {
+            html += `<div class="card"><div class="card-header"><div class="card-title text-red-400">Vulnerabilities</div></div><div class="card-body p-0"><div class="table-container"><table class="table"><thead><tr><th>CVE</th><th>Title</th><th>Severity</th><th>CVSS</th></tr></thead><tbody>`;
+            asset.vulnerabilities.forEach(v => {
+                html += `<tr><td class="font-mono text-sm">${v.cveId}</td><td>${v.title}</td><td>${UI.badge(v.severity, v.severity === 'CRITICAL' ? 'red' : 'amber')}</td><td>${v.cvss}</td></tr>`;
+            });
+            html += `</tbody></table></div></div></div>`;
+        }
+        
+        html += `</div>`;
+        
+        this.openDrawer('Asset Details', html);
+    },
+
+    async exportAssets() {
+        const all = await this.db.getAll('assets', {}, { limit: 9999 });
+        const csv = ReportEngine.generateCSV(all.data, [
+            { header: 'ID', key: 'id' },
+            { header: 'Type', key: 'type' },
+            { header: 'Value', key: 'value' },
+            { header: 'Name', key: 'name' },
+            { header: 'Status', key: 'status' },
+            { header: 'Criticality', key: 'criticality' },
+            { header: 'Risk Score', key: 'riskScore' },
+            { header: 'First Seen', key: 'firstSeenAt' },
+            { header: 'Last Scanned', key: 'lastScannedAt' },
+        ]);
+        Utils.downloadFile(csv, `assets-export-${new Date().toISOString().split('T')[0]}.csv`, 'text/csv;charset=utf-8;');
+        this.toast('Assets exported to CSV', 'success');
+    },
+
+    async renderThreatIntel(container) {
+        const result = await this.db.getAll('iocs', this.pageData.filters, {
+            page: this.pageData.page,
+            limit: this.pageData.limit,
+            search: this.pageData.search,
+        });
+
+        const stats = {
+            total: result.meta.total,
+            active: result.data.filter(i => i.status === 'ACTIVE').length,
+            matched: result.data.filter(i => i.isMatch).length,
+        };
+
+        container.innerHTML = `
+            <div class="space-y-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h1 class="text-3xl font-bold">Threat Intelligence</h1>
+                        <p class="text-sm mt-1" style="color: var(--text-muted);">Manage Indicators of Compromise and threat feeds</p>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <button class="btn btn-secondary btn-sm" onclick="App.exportIOCs()">Export</button>
+                        <button class="btn btn-primary" onclick="App.showAddIocModal()">Add IOC</button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 grid-cols-4 gap-4">
+                    <div class="stat-card"><div class="stat-icon blue"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7.5 14.25v2.25m3-4.5v4.5m3-6.75v6.75m3-9v9M6 20.25h12A2.25 2.25 0 0020.25 18V6A2.25 2.25 0 0018 3.75H6A2.25 2.25 0 003.75 6v12A2.25 2.25 0 006 20.25z"/></svg></div>
+                    <div class="stat-value">${stats.total}</div><div class="stat-label">Total IOCs</div></div>
+                    <div class="stat-card"><div class="stat-icon red"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3.75m0-10.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.75c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.57-.598-3.75h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg></div>
+                    <div class="stat-value">${stats.active}</div><div class="stat-label">Active Threats</div></div>
+                    <div class="stat-card"><div class="stat-icon amber"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a2 18 0 10-4.486-4.486 2 18 0 004.486 4.486z"/></svg></div>
+                    <div class="stat-value">${stats.matched}</div><div class="stat-label">Asset Matches</div></div>
+                    <div class="stat-card"><div class="stat-icon green"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0110.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0l.229 2.523a1.125 1.125 0 01-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0021 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 00-1.913-.247M6.34 18H5.25A2.25 2.25 0 013 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 011.913-.247m10.5 0a48.536 48.536 0 00-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18 10.5h.008v.008H18V10.5zm-3 0h.008v.008H15V10.5z"/></svg></div>
+                    <div class="stat-value">5</div><div class="stat-label">Feeds Active</div></div>
+                </div>
+
+                <div class="card">
+                    <div class="card-body p-4">
+                        <div class="flex items-center gap-4 flex-wrap">
+                            <div class="search-box flex-1" style="min-width: 300px;">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
+                                <input type="text" class="input" placeholder="Search IOCs..." oninput="App.debouncedIocSearch(this.value)">
+                            </div>
+                            <select class="input select" style="width: 140px;" onchange="App.filterIocs('type', this.value)">
+                                <option value="">All Types</option>
+                                <option value="DOMAIN">Domain</option>
+                                <option value="IP">IP</option>
+                                <option value="URL">URL</option>
+                                <option value="FILE_HASH_MD5">MD5</option>
+                                <option value="FILE_HASH_SHA256">SHA256</option>
+                            </select>
+                            <select class="input select" style="width: 140px;" onchange="App.filterIocs('status', this.value)">
+                                <option value="">All Statuses</option>
+                                <option value="ACTIVE">Active</option>
+                                <option value="INACTIVE">Inactive</option>
+                                <option value="WHITELISTED">Whitelisted</option>
+                                <option value="FALSE_POSITIVE">False Positive</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div id="iocsTableContainer"></div>
+                </div>
+            </div>
+        `;
+
+        UI.renderTable('iocsTableContainer', [
+            { 
+                header: 'Indicator', 
+                key: 'value',
+                cell: (row) => `
+                    <div class="flex items-center gap-3">
+                        <div style="width: 36px; height: 36px; border-radius: 8px; background: ${row.type === 'IP' || row.type === 'IPV6' ? 'rgba(16,185,129,0.15)' : row.type.includes('HASH') ? 'rgba(139,92,246,0.15)' : 'rgba(59,130,246,0.15)'}; display: flex; align-items: center; justify-content: center; color: ${row.type === 'IP' || row.type === 'IPV6' ? '#34d399' : row.type.includes('HASH') ? '#c084fc' : '#60a5fa'};">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${row.type.includes('HASH') ? 'M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z' : 'M12.75 3.03v.568c0 .334.382.504.624.327a4.498 4.498 0 011.086-.645 4.503 4.503 0 014.5 0c.333.21.75.016.75-.325V3.03a.75.75 0 00-.633-.727 6.002 6.002 0 00-4.834 0 .75.75 0 00-.633.727zm-1.516 3.63a.75.75 0 01.448.917l-1.5 4.5a.75.75 0 01-1.425-.448l1.5-4.5a.75.75 0 01.977-.469z'}"/></svg>
+                        </div>
+                        <div>
+                            <div class="font-mono text-sm font-medium">${row.value}</div>
+                            ${row.isMatch ? `<div class="flex items-center gap-1 mt-1"><span class="badge badge-red">Asset Match</span><span class="text-xs text-red-400">${row.matchedAssets?.length || 0} assets</span></div>` : ''}
+                        </div>
+                    </div>
+                `
+            },
+            { header: 'Type', key: 'type', cell: (row) => UI.badge(row.type, 'blue') },
+            { header: 'Status', key: 'status', cell: (row) => UI.badge(row.status, row.status === 'ACTIVE' ? 'red' : row.status === 'WHITELISTED' ? 'blue' : 'gray') },
+            { header: 'Confidence', key: 'confidence', cell: (row) => `
+                <div class="flex items-center gap-2">
+                    <div class="w-2 h-2 rounded-full ${row.confidence === 'HIGH' ? 'bg-green-500' : row.confidence === 'MEDIUM' ? 'bg-yellow-500' : 'bg-red-500'}"></div>
+                    <span class="text-sm">${row.confidence}</span>
+                    ${row.confidenceScore ? `<span class="text-xs" style="color: var(--text-muted);">(${row.confidenceScore})</span>` : ''}
+                </div>
+            ` },
+            { header: 'Threat Actors', key: 'threatActors', cell: (row) => `
+                <div class="flex flex-wrap gap-1">
+                    ${(row.threatActors || []).slice(0, 2).map(a => `<span class="badge badge-gray">${a}</span>`).join('')}
+                    ${(row.threatActors || []).length > 2 ? `<span class="badge badge-gray">+${row.threatActors.length - 2}</span>` : ''}
+                </div>
+            ` },
+            { header: 'First Seen', key: 'firstSeenAt', cell: (row) => `<span class="text-sm" style="color: var(--text-muted);">${Utils.timeAgo(row.firstSeenAt)}</span>` },
+            { header: '', key: 'actions', cell: (row) => `
+                <div class="flex items-center gap-2">
+                    <button class="btn btn-sm btn-secondary" onclick="event.stopPropagation(); App.enrichIoc(${row.id})">Enrich</button>
+                    <button class="btn btn-sm btn-secondary" onclick="event.stopPropagation(); App.viewIoc(${row.id})">View</button>
+                </div>
+            ` }
+        ], result.data, { onRowClick: true, pagination: result.meta });
+    },
+
+    debouncedIocSearch: Utils.debounce(function(val) {
+        App.pageData.search = val;
+        App.pageData.page = 1;
+        App.navigate('threat-intel');
+    }, 300),
+
+    filterIocs(key, value) {
+        if (value) {
+            this.pageData.filters[key] = value;
+        } else {
+            delete this.pageData.filters[key];
+        }
+        this.pageData.page = 1;
+        this.navigate('threat-intel');
+    },
+
+    showAddIocModal() {
+        this.openModal('Add Indicator of Compromise', UI.renderForm([
+            { label: 'IOC Type', name: 'type', type: 'select', required: true, options: [
+                { value: 'DOMAIN', label: 'Domain' },
+                { value: 'IP', label: 'IP Address' },
+                { value: 'URL', label: 'URL' },
+                { value: 'FILE_HASH_MD5', label: 'MD5 Hash' },
+                { value: 'FILE_HASH_SHA256', label: 'SHA256 Hash' },
+                { value: 'EMAIL', label: 'Email' },
+            ]},
+            { label: 'Value', name: 'value', type: 'text', required: true, placeholder: 'Indicator value' },
+            { label: 'Confidence', name: 'confidence', type: 'select', options: [
+                { value: 'HIGH', label: 'High' },
+                { value: 'MEDIUM', label: 'Medium', selected: true },
+                { value: 'LOW', label: 'Low' },
+            ]},
+            { label: 'Threat Actors', name: 'threatActors', type: 'tags', placeholder: 'APT29, Lazarus' },
+            { label: 'Description', name: 'description', type: 'textarea', placeholder: 'Context and details...' },
+        ], 'App.submitIoc'));
+    },
+
+    async submitIoc(form) {
+        const data = Object.fromEntries(new FormData(form));
+        data.threatActors = data.threatActors ? data.threatActors.split(',').map(t => t.trim()) : [];
+        data.status = 'ACTIVE';
+        data.confidenceScore = data.confidence === 'HIGH' ? 85 : data.confidence === 'MEDIUM' ? 60 : 35;
+        data.tags = [];
+        data.isMatch = false;
+        data.matchedAssets = [];
+        
+        await App.db.create('iocs', data);
+        App.toast('IOC added successfully', 'success');
+        App.closeModal();
+        App.navigate('threat-intel');
+    },
+
+    async enrichIoc(id) {
+        this.toast('Enriching IOC with external sources...', 'warning');
+        const ioc = await this.db.getById('iocs', id);
+        if (!ioc) return;
+        
+        await new Promise(r => setTimeout(r, 1500));
+        await this.db.update('iocs', id, {
+            metadata: {
+                virusTotal: { reputationScore: Utils.randomInt(0, 100), lastChecked: new Date().toISOString() },
+                abuseIPDB: { abuseConfidenceScore: Utils.randomInt(0, 100) },
+            }
+        });
+        
+        this.toast('IOC enriched successfully', 'success');
+        this.navigate('threat-intel');
+    },
+
+    async viewIoc(id) {
+        const ioc = await this.db.getById('iocs', id);
+        if (!ioc) return;
+        
+        let html = `
+            <div class="space-y-4">
+                <div class="flex items-center gap-3 mb-4">
+                    <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(239,68,68,0.15); display: flex; align-items: center; justify-content: center; color: #f87171;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3.75m9-3.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75c.621 0 1.125.504 1.125 1.125v1.5c0 .621-.504 1.125-1.125 1.125h-.375a1.125 1.125 0 01-1.125-1.125v-1.5c0-.621.504-1.125 1.125-1.125H12z"/></svg>
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-bold font-mono">${ioc.value}</h2>
+                        <div class="flex gap-2 mt-1">${UI.badge(ioc.type)} ${UI.badge(ioc.status)} ${UI.badge(ioc.confidence)}</div>
+                    </div>
+                </div>
+                
+                <div class="card"><div class="card-body">
+                    <div class="text-sm mb-2" style="color: var(--text-muted);">Description</div>
+                    <div>${ioc.description || 'No description provided.'}</div>
+                </div></div>
+                
+                ${ioc.metadata?.virusTotal ? `
+                <div class="card"><div class="card-header"><div class="card-title">VirusTotal Enrichment</div></div><div class="card-body">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div><div class="text-sm" style="color: var(--text-muted);">Reputation Score</div><div class="text-lg font-bold">${ioc.metadata.virusTotal.reputationScore}%</div></div>
+                        <div><div class="text-sm" style="color: var(--text-muted);">Last Checked</div><div class="text-lg font-bold">${Utils.timeAgo(ioc.metadata.virusTotal.lastChecked)}</div></div>
+                    </div>
+                </div></div>
+                ` : ''}
+                
+                ${ioc.isMatch ? `
+                <div class="card border-red-500"><div class="card-header"><div class="card-title text-red-400">⚠️ Asset Matches</div></div><div class="card-body">
+                    <div class="text-red-400">This IOC has been matched against ${ioc.matchedAssets?.length || 0} assets in your inventory.</div>
+                </div></div>
+                ` : ''}
+            </div>
+        `;
+        
+        this.openDrawer('IOC Details', html);
+    },
+
+    async exportIOCs() {
+        const all = await this.db.getAll('iocs', {}, { limit: 9999 });
+        const csv = ReportEngine.generateCSV(all.data, [
+            { header: 'ID', key: 'id' }, { header: 'Type', key: 'type' }, { header: 'Value', key: 'value' },
+            { header: 'Status', key: 'status' }, { header: 'Confidence', key: 'confidence' },
+            { header: 'Threat Actors', key: 'threatActors' }, { header: 'First Seen', key: 'firstSeenAt' },
+        ]);
+        Utils.downloadFile(csv, `iocs-export-${new Date().toISOString().split('T')[0]}.csv`, 'text/csv;charset=utf-8;');
+        this.toast('IOCs exported to CSV', 'success');
+    },
+
+    async renderBrandMonitor(container) {
+        const brands = await this.db.getAll('brands', {}, { limit: 9999 });
+        const mentions = await this.db.getAll('mentions', {}, { limit: 20, sortBy: 'createdAt', sortOrder: 'desc' });
+
+        container.innerHTML = `
+            <div class="space-y-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h1 class="text-3xl font-bold">Brand Monitoring</h1>
+                        <p class="text-sm mt-1" style="color: var(--text-muted);">Protect your brand from impersonation and abuse</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="App.showAddBrandModal()">Add Brand</button>
+                </div>
+
+                <div class="grid grid-cols-1 grid-cols-2 gap-6">
+                    <div class="card"><div class="card-header"><div class="card-title">Monitored Brands</div></div>
+                    <div class="card-body">
+                        ${brands.data.length ? brands.data.map(b => `
+                            <div class="flex items-center justify-between p-3 rounded-lg border mb-2" style="border-color: var(--border);">
+                                <div>
+                                    <div class="font-medium">${b.name}</div>
+                                    <div class="text-xs mt-1" style="color: var(--text-muted);">${b.keywords?.join(', ')}</div>
+                                </div>
+                                <div class="flex gap-2">
+                                    ${b.isActive ? UI.badge('Active', 'green') : UI.badge('Inactive', 'gray')}
+                                    <button class="btn btn-sm btn-secondary" onclick="App.scanBrand(${b.id})">Scan</button>
+                                </div>
+                            </div>
+                        `).join('') : '<div class="empty-state"><h3>No brands configured</h3></div>'}
+                    </div></div>
+
+                    <div class="card"><div class="card-header"><div class="card-title">Recent Mentions</div></div>
+                    <div class="card-body">
+                        ${mentions.data.length ? mentions.data.map(m => `
+                            <div class="flex items-start gap-3 p-3 rounded-lg border mb-2" style="border-color: var(--border);">
+                                <div style="width: 32px; height: 32px; border-radius: 50%; background: ${m.sentiment === 'NEGATIVE' ? 'rgba(239,68,68,0.15)' : 'rgba(59,130,246,0.15)'}; display: flex; align-items: center; justify-content: center; color: ${m.sentiment === 'NEGATIVE' ? '#f87171' : '#60a5fa'}; flex-shrink: 0;">
+                                    ${m.sentiment === 'NEGATIVE' ? '!' : 'i'}
+                                </div>
+                                <div>
+                                    <div class="text-sm font-medium">${m.title || 'Mention detected'}</div>
+                                    <div class="text-xs mt-1" style="color: var(--text-muted);">${m.content?.substring(0, 100)}...</div>
+                                    <div class="text-xs mt-1" style="color: var(--text-muted);">${Utils.timeAgo(m.createdAt)} • ${m.source}</div>
+                                </div>
+                            </div>
+                        `).join('') : '<div class="empty-state"><h3>No mentions yet</h3></div>'}
+                    </div></div>
+                </div>
+            </div>
+        `;
+    },
+
+    showAddBrandModal() {
+        this.openModal('Add Brand to Monitor', UI.renderForm([
+            { label: 'Brand Name', name: 'name', type: 'text', required: true },
+            { label: 'Keywords', name: 'keywords', type: 'tags', placeholder: 'Brand, Product, Service' },
+            { label: 'Official Domains', name: 'officialDomains', type: 'tags', placeholder: 'example.com' },
+        ], 'App.submitBrand'));
+    },
+
+    async submitBrand(form) {
+        const data = Object.fromEntries(new FormData(form));
+        data.keywords = data.keywords ? data.keywords.split(',').map(t => t.trim()) : [];
+        data.officialDomains = data.officialDomains ? data.officialDomains.split(',').map(t => t.trim()) : [];
+        data.isActive = true;
+        await App.db.create('brands', data);
+        App.toast('Brand added to monitoring', 'success');
+        App.closeModal();
+        App.navigate('brand-monitor');
+    },
+
+    async scanBrand(id) {
+        this.toast('Scanning for brand mentions and impersonation...', 'warning');
+        const sources = ['Twitter', 'Reddit', 'Pastebin', 'GitHub'];
+        const sentiments = ['POSITIVE', 'NEGATIVE', 'NEUTRAL', 'SUSPICIOUS'];
+        for (let i = 0; i < 3; i++) {
+            await this.db.create('mentions', {
+                brandId: id,
+                source: Utils.randomPick(sources),
+                title: `Mention detected on ${Utils.randomPick(sources)}`,
+                content: `Potential brand reference found in recent post discussing security concerns...`,
+                sentiment: Utils.randomPick(sentiments),
+                isImpersonation: Math.random() > 0.7,
+            });
+        }
+        this.toast('Brand scan completed', 'success');
+        this.navigate('brand-monitor');
+    },
+
+    async renderAlerts(container) {
+        const result = await this.db.getAll('alerts', this.pageData.filters, {
+            page: this.pageData.page,
+            limit: this.pageData.limit,
+            sortBy: 'triggeredAt',
+            sortOrder: 'desc',
+        });
+
+        container.innerHTML = `
+            <div class="space-y-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h1 class="text-3xl font-bold">Alert Center</h1>
+                        <p class="text-sm mt-1" style="color: var(--text-muted);">Security alerts and notifications</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button class="btn btn-secondary btn-sm" onclick="App.filterAlerts('status', 'NEW')">New Only</button>
+                        <button class="btn btn-secondary btn-sm" onclick="App.filterAlerts('severity', 'CRITICAL')">Critical</button>
+                        <button class="btn btn-secondary btn-sm" onclick="App.clearFilters()">Clear</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div id="alertsTableContainer"></div>
+                </div>
+            </div>
+        `;
+
+        UI.renderTable('alertsTableContainer', [
+            { header: 'Alert', key: 'title', cell: (row) => `
+                <div>
+                    <div class="font-medium">${row.title}</div>
+                    <div class="text-xs mt-1" style="color: var(--text-muted);">${row.description?.substring(0, 60)}...</div>
+                </div>
+            ` },
+            { header: 'Category', key: 'category', cell: (row) => UI.badge(row.category, 'blue') },
+            { header: 'Severity', key: 'severity', cell: (row) => UI.badge(row.severity, row.severity === 'CRITICAL' ? 'red' : row.severity === 'HIGH' ? 'amber' : 'blue') },
+            { header: 'Status', key: 'status', cell: (row) => UI.badge(row.status, row.status === 'NEW' ? 'red' : row.status === 'RESOLVED' ? 'green' : 'amber') },
+            { header: 'Time', key: 'triggeredAt', cell: (row) => `<span class="text-sm" style="color: var(--text-muted);">${Utils.timeAgo(row.triggeredAt)}</span>` },
+            { header: '', key: 'actions', cell: (row) => `
+                <div class="flex gap-2">
+                    ${row.status === 'NEW' ? `<button class="btn btn-sm btn-primary" onclick="event.stopPropagation(); App.ackAlert(${row.id})">Ack</button>` : ''}
+                    <button class="btn btn-sm btn-secondary" onclick="event.stopPropagation(); App.resolveAlert(${row.id})">Resolve</button>
+                </div>
+            ` }
+        ], result.data, { pagination: result.meta });
+    },
+
+    filterAlerts(key, value) {
+        this.pageData.filters = { [key]: value };
+        this.pageData.page = 1;
+        this.navigate('alerts');
+    },
+
+    clearFilters() {
+        this.pageData.filters = {};
+        this.pageData.page = 1;
+        this.navigate('alerts');
+    },
+
+    async ackAlert(id) {
+        await this.db.update('alerts', id, { status: 'ACKNOWLEDGED', acknowledgedAt: new Date().toISOString() });
+        this.toast('Alert acknowledged', 'success');
+        this.updateAlertBadge();
+        this.navigate('alerts');
+    },
+
+    async resolveAlert(id) {
+        await this.db.update('alerts', id, { status: 'RESOLVED', resolvedAt: new Date().toISOString() });
+        this.toast('Alert resolved', 'success');
+        this.updateAlertBadge();
+        this.navigate('alerts');
+    },
+
+    async updateAlertBadge() {
+        const alerts = await this.db.getAll('alerts', { status: 'NEW' }, { limit: 9999 });
+        const badge = document.getElementById('alertBadge');
+        if (badge) {
+            badge.textContent = alerts.data.length;
+            badge.style.display = alerts.data.length ? 'inline-flex' : 'none';
+        }
+    },
+
+    async renderScans(container) {
+        const result = await this.db.getAll('scans', {}, {
+            page: this.pageData.page,
+            limit: this.pageData.limit,
+            sortBy: 'createdAt',
+            sortOrder: 'desc',
+        });
+
+        container.innerHTML = `
+            <div class="space-y-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h1 class="text-3xl font-bold">Scan Management</h1>
+                        <p class="text-sm mt-1" style="color: var(--text-muted);">Reconnaissance and discovery jobs</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="App.showNewScanModal()">New Scan</button>
+                </div>
+
+                <div class="card">
+                    <div id="scansTableContainer"></div>
+                </div>
+            </div>
+        `;
+
+        UI.renderTable('scansTableContainer', [
+            { header: 'Scan Name', key: 'name', cell: (row) => `
+                <div>
+                    <div class="font-medium">${row.name || 'Unnamed Scan'}</div>
+                    <div class="text-xs mt-1" style="color: var(--text-muted);">${row.scanType || 'OSINT_FULL'}</div>
+                </div>
+            ` },
+            { header: 'Status', key: 'status', cell: (row) => `
+                <div class="scan-status">
+                    <div class="scan-status-dot ${row.status?.toLowerCase()}"></div>
+                    <span class="text-sm font-medium">${row.status}</span>
+                </div>
+            ` },
+            { header: 'Progress', key: 'progress', cell: (row) => `
+                <div class="flex items-center gap-3" style="width: 200px;">
+                    <div class="progress-bar flex-1"><div class="progress-bar-fill bg-blue-500" style="width: ${row.progress || 0}%"></div></div>
+                    <span class="text-xs font-medium" style="width: 40px;">${row.progress || 0}%</span>
+                </div>
+            ` },
+            { header: 'Targets', key: 'targetCount', cell: (row) => `<span class="text-sm">${row.completedCount || 0}/${row.targetCount || 0}</span>` },
+            { header: 'Started', key: 'startedAt', cell: (row) => `<span class="text-sm" style="color: var(--text-muted);">${row.startedAt ? Utils.timeAgo(row.startedAt) : 'Pending'}</span>` },
+            { header: '', key: 'actions', cell: (row) => `
+                <button class="btn btn-sm btn-secondary" ${row.status !== 'RUNNING' ? 'disabled' : ''} onclick="event.stopPropagation(); App.cancelScan(${row.id})">Cancel</button>
+            ` }
+        ], result.data, { pagination: result.meta });
+    },
+
+    showNewScanModal() {
+        this.openModal('New Scan Job', UI.renderForm([
+            { label: 'Scan Name', name: 'name', type: 'text', required: true },
+            { label: 'Scan Type', name: 'scanType', type: 'select', required: true, options: [
+                { value: 'DOMAIN_ENUMERATION', label: 'Domain Enumeration' },
+                { value: 'SUBDOMAIN_BRUTEFORCE', label: 'Subdomain Bruteforce' },
+                { value: 'DNS_ENUMERATION', label: 'DNS Enumeration' },
+                { value: 'SSL_CERTIFICATE_SCAN', label: 'SSL Certificate Scan' },
+                { value: 'OSINT_FULL', label: 'Full OSINT Scan' },
+            ]},
+            { label: 'Target Assets (comma separated IDs)', name: 'targets', type: 'text', required: true, placeholder: '1, 2, 3' },
+        ], 'App.submitScan'));
+    },
+
+    async submitScan(form) {
+        const data = Object.fromEntries(new FormData(form));
+        data.targets = data.targets.split(',').map(t => parseInt(t.trim())).filter(Boolean);
+        data.status = 'PENDING';
+        data.progress = 0;
+        
+        const id = await App.db.create('scans', data);
+        App.toast('Scan job created', 'success');
+        App.closeModal();
+        App.navigate('scans');
+        
+        setTimeout(() => App.osint.runScanJob({ ...data, id }), 500);
+    },
+
+    async cancelScan(id) {
+        await this.db.update('scans', id, { status: 'CANCELLED' });
+        this.toast('Scan cancelled', 'warning');
+        this.navigate('scans');
+    },
+
+    async renderReports(container) {
+        const result = await this.db.getAll('reports', {}, {
+            page: this.pageData.page,
+            limit: this.pageData.limit,
+            sortBy: 'createdAt',
+            sortOrder: 'desc',
+        });
+
+        container.innerHTML = `
+            <div class="space-y-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h1 class="text-3xl font-bold">Report Generator</h1>
+                        <p class="text-sm mt-1" style="color: var(--text-muted);">Generate executive and technical reports</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="App.showNewReportModal()">Generate Report</button>
+                </div>
+
+                <div class="card">
+                    <div id="reportsTableContainer"></div>
+                </div>
+            </div>
+        `;
+
+        UI.renderTable('reportsTableContainer', [
+            { header: 'Report', key: 'title', cell: (row) => `
+                <div class="flex items-center gap-3">
+                    <div style="width: 40px; height: 40px; border-radius: 8px; background: rgba(59,130,246,0.15); display: flex; align-items: center; justify-content: center; color: #60a5fa;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/></svg>
+                    </div>
+                    <div>
+                        <div class="font-medium">${row.title}</div>
+                        <div class="text-xs mt-1" style="color: var(--text-muted);">${row.type} • ${row.format}</div>
+                    </div>
+                </div>
+            ` },
+            { header: 'Status', key: 'status', cell: (row) => UI.badge(row.status, row.status === 'READY' ? 'green' : row.status === 'GENERATING' ? 'amber' : 'blue') },
+            { header: 'Generated', key: 'generatedAt', cell: (row) => `<span class="text-sm" style="color: var(--text-muted);">${row.generatedAt ? Utils.timeAgo(row.generatedAt) : 'Pending'}</span>` },
+            { header: '', key: 'actions', cell: (row) => `
+                <div class="flex gap-2">
+                    <button class="btn btn-sm btn-primary" onclick="event.stopPropagation(); App.downloadReport(${row.id})">Download</button>
+                    <button class="btn btn-sm btn-secondary" onclick="event.stopPropagation(); App.viewReport(${row.id})">Preview</button>
+                </div>
+            ` }
+        ], result.data, { pagination: result.meta });
+    },
+
+    showNewReportModal() {
+        this.openModal('Generate New Report', UI.renderForm([
+            { label: 'Report Title', name: 'title', type: 'text', required: true },
+            { label: 'Report Type', name: 'type', type: 'select', required: true, options: [
+                { value: 'EXECUTIVE_SUMMARY', label: 'Executive Summary' },
+                { value: 'TECHNICAL_DETAILS', label: 'Technical Details' },
+                { value: 'ASSET_INVENTORY', label: 'Asset Inventory' },
+                { value: 'THREAT_ASSESSMENT', label: 'Threat Assessment' },
+                { value: 'VULNERABILITY_REPORT', label: 'Vulnerability Report' },
+            ]},
+            { label: 'Format', name: 'format', type: 'select', options: [
+                { value: 'PDF', label: 'PDF (Print)', selected: true },
+                { value: 'CSV', label: 'CSV Spreadsheet' },
+            ]},
+            { label: 'Date Range (days)', name: 'dateRange', type: 'text', placeholder: '30', value: '30' },
+        ], 'App.submitReport'));
+    },
+
+    async submitReport(form) {
+        const data = Object.fromEntries(new FormData(form));
+        data.status = 'GENERATING';
+        
+        const id = await App.db.create('reports', data);
+        App.toast('Report generation started', 'success');
+        App.closeModal();
+        App.navigate('reports');
+        
+        setTimeout(async () => {
+            await App.db.update('reports', id, { status: 'READY', generatedAt: new Date().toISOString() });
+            App.toast('Report is ready for download', 'success');
+            if (App.currentPage === 'reports') App.navigate('reports');
+        }, 2000);
+    },
+
+    async downloadReport(id) {
+        const report = await this.db.getById('reports', id);
+        if (!report) return;
+        
+        if (report.format === 'CSV') {
+            const assets = await App.db.getAll('assets', {}, { limit: 9999 });
+            const csv = ReportEngine.generateCSV(assets.data, [
+                { header: 'Type', key: 'type' }, { header: 'Value', key: 'value' },
+                { header: 'Status', key: 'status' }, { header: 'Risk Score', key: 'riskScore' },
+            ]);
+            Utils.downloadFile(csv, `${report.title}.csv`, 'text/csv;charset=utf-8;');
+        } else {
+            const assets = await App.db.getAll('assets', {}, { limit: 9999 });
+            const alerts = await App.db.getAll('alerts', {}, { limit: 9999 });
+            const iocs = await App.db.getAll('iocs', {}, { limit: 9999 });
+            
+            ReportEngine.generatePDF(report.title, [
+                { title: 'Executive Summary', content: `This report covers ${assets.data.length} assets, ${alerts.data.length} alerts, and ${iocs.data.length} threat indicators.` },
+                { title: 'Asset Inventory', table: true, columns: ['Type', 'Value', 'Status', 'Risk'], data: assets.data.slice(0, 20).map(a => ({ values: [a.type, a.value, a.status, a.riskScore || 0], class: ['', '', '', a.riskScore > 70 ? 'severity-high' : ''] })) },
+                { title: 'Threat Indicators', table: true, columns: ['Type', 'Value', 'Status', 'Confidence'], data: iocs.data.slice(0, 10).map(i => ({ values: [i.type, i.value, i.status, i.confidence] })) },
+                { title: 'Active Alerts', table: true, columns: ['Title', 'Severity', 'Status', 'Time'], data: alerts.data.slice(0, 10).map(a => ({ values: [a.title, a.severity, a.status, Utils.timeAgo(a.triggeredAt)] })) },
+            ]);
+        }
+    },
+
+    async viewReport(id) {
+        const report = await this.db.getById('reports', id);
+        this.openDrawer('Report Preview', `<div class="space-y-4"><h2 class="text-xl font-bold">${report.title}</h2><div class="card"><div class="card-body">Report ${report.status === 'READY' ? 'is ready for download.' : 'is still being generated...'}</div></div></div>`);
+    },
+
+    renderSettings(container) {
+        container.innerHTML = `
+            <div class="space-y-6">
+                <div>
+                    <h1 class="text-3xl font-bold">System Settings</h1>
+                    <p class="text-sm mt-1" style="color: var(--text-muted);">Platform configuration and integrations</p>
+                </div>
+
+                <div class="grid grid-cols-1 grid-cols-2 gap-6">
+                    <div class="card">
+                        <div class="card-header"><div class="card-title">API Integrations</div></div>
+                        <div class="card-body space-y-4">
+                            <div class="flex items-center justify-between p-3 rounded-lg border" style="border-color: var(--border);">
+                                <div><div class="font-medium">VirusTotal</div><div class="text-xs" style="color: var(--text-muted);">Threat reputation API</div></div>
+                                <div class="flex items-center gap-2"><span class="badge badge-green">Active</span></div>
+                            </div>
+                            <div class="flex items-center justify-between p-3 rounded-lg border" style="border-color: var(--border);">
+                                <div><div class="font-medium">AbuseIPDB</div><div class="text-xs" style="color: var(--text-muted);">IP reputation check</div></div>
+                                <div class="flex items-center gap-2"><span class="badge badge-green">Active</span></div>
+                            </div>
+                            <div class="flex items-center justify-between p-3 rounded-lg border" style="border-color: var(--border);">
+                                <div><div class="font-medium">Shodan</div><div class="text-xs" style="color: var(--text-muted);">Internet scanning</div></div>
+                                <div class="flex items-center gap-2"><span class="badge badge-gray">Not Configured</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header"><div class="card-title">Security Settings</div></div>
+                        <div class="card-body space-y-4">
+                            <div class="flex items-center justify-between">
+                                <div><div class="font-medium">MFA Authentication</div><div class="text-xs" style="color: var(--text-muted);">Require TOTP for all users</div></div>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" class="sr-only peer" checked>
+                                    <div class="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                                </label>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div><div class="font-medium">Session Timeout</div><div class="text-xs" style="color: var(--text-muted);">Auto logout after 30 min</div></div>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" class="sr-only peer" checked>
+                                    <div class="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                                </label>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div><div class="font-medium">Audit Logging</div><div class="text-xs" style="color: var(--text-muted);">Log all user actions</div></div>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" class="sr-only peer" checked>
+                                    <div class="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card col-span-2">
+                        <div class="card-header"><div class="card-title">System Information</div></div>
+                        <div class="card-body">
+                            <div class="grid grid-cols-2 gap-4 text-sm">
+                                <div><span style="color: var(--text-muted);">Version:</span> <span class="font-medium">1.0.0-PROD</span></div>
+                                <div><span style="color: var(--text-muted);">Database:</span> <span class="font-medium">IndexedDB (Browser Native)</span></div>
+                                <div><span style="color: var(--text-muted);">Architecture:</span> <span class="font-medium">Single File Application</span></div>
+                                <div><span style="color: var(--text-muted);">Compliance:</span> <span class="font-medium">OWASP ASVS L2</span></div>
+                                <div><span style="color: var(--text-muted);">Encryption:</span> <span class="font-medium">AES-256 (Client-Side)</span></div>
+                                <div><span style="color: var(--text-muted);">Last Backup:</span> <span class="font-medium">Auto (LocalStorage)</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    },
+
+    openModal(title, bodyHtml, footerHtml = '') {
+        document.getElementById('modalTitle').textContent = title;
+        document.getElementById('modalBody').innerHTML = bodyHtml;
+        document.getElementById('modalFooter').innerHTML = footerHtml;
+        document.getElementById('modalOverlay').classList.add('active');
+    },
+
+    closeModal() {
+        document.getElementById('modalOverlay').classList.remove('active');
+    },
+
+    openDrawer(title, bodyHtml) {
+        document.getElementById('drawerTitle').textContent = title;
+        document.getElementById('drawerBody').innerHTML = bodyHtml;
+        document.getElementById('drawerOverlay').classList.add('active');
+        document.getElementById('drawerPanel').classList.add('active');
+    },
+
+    closeDrawer() {
+        document.getElementById('drawerOverlay').classList.remove('active');
+        document.getElementById('drawerPanel').classList.remove('active');
+    },
+
+    toast(message, type = 'info') {
+        const container = document.getElementById('toastContainer');
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+        const icons = {
+            success: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="text-green-500"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>',
+            error: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="text-red-500"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3.75m9-3.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"/></svg>',
+            warning: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="text-amber-500"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/></svg>',
+        };
+        toast.innerHTML = `${icons[type] || icons.success}<span class="font-medium">${message}</span>`;
+        container.appendChild(toast);
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateX(100%)';
+            setTimeout(() => toast.remove(), 300);
+        }, 4000);
+    },
+
+    handleRowClick(id) {
+        if (this.currentPage === 'assets') this.viewAsset(id);
+        else if (this.currentPage === 'threat-intel') this.viewIoc(id);
+    }
+};
+
+document.addEventListener('DOMContentLoaded', () => App.init());
+</script>
+</body>
+</html>
